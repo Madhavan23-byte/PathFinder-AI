@@ -25,18 +25,37 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Validation rules
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const passwordValid = password.length >= 8;
+
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (!emailValid) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+    if (!passwordValid) {
+      setErrorMsg('Password must be at least 8 characters long.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       await login(email.trim(), password);
       navigate(from, { replace: true });
     } catch (err: any) {
-      setErrorMsg(err.message || 'Incorrect email or password. Please check your credentials and try again.');
+      const msg = err.message || '';
+      if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('Server error')) {
+        setErrorMsg('Unable to connect to PathFinder server. Please make sure the backend is running.');
+      } else {
+        setErrorMsg('Incorrect email or password.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -46,7 +65,7 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-slate-900 text-white flex flex-col lg:flex-row items-stretch font-sans selection:bg-indigo-500 selection:text-white">
       {/* LEFT SIDE: Branding, Headline, Description & 5-Step Adaptive Loop */}
       <div className="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 border-r border-slate-800">
-        {/* Glow Effects */}
+        {/* Ambient Glow Effects */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -56,7 +75,7 @@ export const LoginPage: React.FC = () => {
               <BrainCircuit className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="text-2xl font-bold tracking-tight text-white">PathFinder</span>
+              <span className="text-2xl font-bold tracking-tight text-white">PATHFINDER</span>
               <span className="block text-[10px] uppercase tracking-wider font-semibold text-indigo-400">
                 Adaptive AI Navigator
               </span>
@@ -76,7 +95,7 @@ export const LoginPage: React.FC = () => {
             PathFinder continuously adapts your learning journey based on your skills, performance, goals, and progress.
           </p>
 
-          {/* 5-Step Adaptive Loop Diagram */}
+          {/* 5-Step Continuous Adaptation Cycle */}
           <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-4">
             <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
               <Activity className="w-4 h-4 text-cyan-400" />
@@ -84,15 +103,15 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between text-xs font-semibold text-slate-200 pt-1">
-              {['Assess', 'Understand', 'Personalize', 'Learn', 'Adapt'].map((step, idx, arr) => (
+              {['ASSESS', 'UNDERSTAND', 'PERSONALIZE', 'LEARN', 'ADAPT'].map((step, idx, arr) => (
                 <React.Fragment key={step}>
                   <div className="flex flex-col items-center gap-1">
-                    <div className="w-7 h-7 rounded-full bg-slate-800 border border-indigo-500/40 flex items-center justify-center text-[11px] font-bold text-indigo-300">
+                    <div className="w-7 h-7 rounded-full bg-slate-800 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold text-indigo-300 shadow-inner">
                       {idx + 1}
                     </div>
-                    <span className="text-[11px]">{step}</span>
+                    <span className="text-[10px] tracking-wider uppercase font-bold text-slate-300">{step}</span>
                   </div>
-                  {idx < arr.length - 1 && <ArrowRight className="w-3.5 h-3.5 text-slate-600" />}
+                  {idx < arr.length - 1 && <ArrowRight className="w-3.5 h-3.5 text-indigo-500/60" />}
                 </React.Fragment>
               ))}
             </div>
@@ -100,16 +119,16 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div className="relative z-10 text-xs text-slate-500">
-          PathFinder AI Engine © 2026. Built for Full-Stack Learning Excellence.
+          PathFinder AI Engine © 2026. Production Full-Stack Application.
         </div>
       </div>
 
-      {/* RIGHT SIDE: Authentication Card */}
+      {/* RIGHT SIDE: Login Card */}
       <div className="lg:w-1/2 p-6 sm:p-12 lg:p-16 flex items-center justify-center bg-slate-900">
         <div className="w-full max-w-md bg-slate-800/80 border border-slate-700/80 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl space-y-6">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-white">Welcome back</h2>
-            <p className="text-xs text-slate-400">Sign in to continue your learning journey.</p>
+            <p className="text-xs text-slate-400">Sign in to continue your personalized learning journey.</p>
           </div>
 
           {/* Error Alert */}
@@ -123,19 +142,25 @@ export const LoginPage: React.FC = () => {
           {/* Credentials Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Email Address</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1.5">Email</label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"
                   placeholder="name@example.com"
                   disabled={isSubmitting}
                 />
               </div>
+              {email.length > 0 && !emailValid && (
+                <p className="text-[10px] text-rose-400 mt-1">Please enter a valid email format.</p>
+              )}
             </div>
 
             <div>
@@ -146,7 +171,10 @@ export const LoginPage: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errorMsg) setErrorMsg(null);
+                  }}
                   className="w-full pl-10 pr-10 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"
                   placeholder="Enter your password"
                   disabled={isSubmitting}
@@ -159,6 +187,9 @@ export const LoginPage: React.FC = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {password.length > 0 && !passwordValid && (
+                <p className="text-[10px] text-rose-400 mt-1">Password must be at least 8 characters.</p>
+              )}
             </div>
 
             <div className="flex items-center justify-between text-xs text-slate-400">
