@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LineChart,
-  Target,
   Flame,
-  Award,
-  Clock,
-  Sparkles,
+  Calendar,
+  AlertCircle,
+  RefreshCw,
   HeartHandshake,
   CheckCircle2,
-  Calendar,
+  ArrowRight,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -20,28 +19,89 @@ import {
   LineChart as ReLineChart,
   Line,
 } from 'recharts';
-import { useApp } from '../context/AppContext';
+import { NavLink } from 'react-router-dom';
+import { apiService } from '../services/api';
+import { ProgressData } from '../types';
 
 export const ProgressPage: React.FC = () => {
-  const { profile } = useApp();
-  const [workloadAdjusted, setWorkloadAdjusted] = useState(false);
+  const [data, setData] = useState<ProgressData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const weeklyRhythmData = [
-    { day: 'Mon', planned: 2, actual: 2.5 },
-    { day: 'Tue', planned: 2, actual: 2.0 },
-    { day: 'Wed', planned: 2, actual: 0.0 },
-    { day: 'Thu', planned: 2, actual: 1.5 },
-    { day: 'Fri', planned: 0, actual: 0.0 },
-    { day: 'Sat', planned: 1, actual: 0.5 },
-    { day: 'Sun', planned: 1, actual: 0.0 },
-  ];
+  const fetchProgress = async () => {
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await apiService.getProgress();
+      setData(res);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Unable to load progress metrics.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const scoreTrendData = [
-    { quiz: 'Test 1', score: 62 },
-    { quiz: 'Test 2', score: 70 },
-    { quiz: 'Test 3', score: 75 },
-    { quiz: 'Test 4', score: 78 },
-  ];
+  useEffect(() => {
+    fetchProgress();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12 animate-pulse">
+        <div className="h-10 bg-slate-200 rounded-xl w-1/3" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-28 bg-slate-200 rounded-2xl" />
+          ))}
+        </div>
+        <div className="h-64 bg-slate-200 rounded-3xl" />
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-base font-bold text-slate-900">Unable to load progress</h2>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">{errorMsg}</p>
+        </div>
+        <button
+          onClick={fetchProgress}
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry</span>
+        </button>
+      </div>
+    );
+  }
+
+  if (!data || data.learningHours === 0) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+          <LineChart className="w-6 h-6" />
+        </div>
+        <div className="space-y-1 max-w-md mx-auto">
+          <h2 className="text-lg font-bold text-slate-900">Your progress will appear here as you begin learning</h2>
+          <p className="text-xs text-slate-500">
+            Complete your diagnostic assessment and practice questions to populate your progress analytics.
+          </p>
+        </div>
+        <NavLink
+          to="/assessment"
+          className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 shadow-md inline-flex items-center gap-2"
+        >
+          <span>Start Assessment</span>
+          <ArrowRight className="w-4 h-4" />
+        </NavLink>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -60,9 +120,8 @@ export const ProgressPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Top 4 Summary Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Career Readiness Circular Card */}
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
             <svg className="w-16 h-16 transform -rotate-90">
@@ -75,41 +134,43 @@ export const ProgressPage: React.FC = () => {
                 strokeWidth="6"
                 fill="transparent"
                 strokeDasharray="163"
-                strokeDashoffset={163 - (163 * 72) / 100}
+                strokeDashoffset={163 - (163 * (data.careerReadiness || 0)) / 100}
                 strokeLinecap="round"
               />
             </svg>
-            <span className="absolute font-extrabold text-sm text-slate-900">72%</span>
+            <span className="absolute font-extrabold text-sm text-slate-900">{data.careerReadiness}%</span>
           </div>
           <div>
             <span className="text-xs font-bold text-slate-500 uppercase">Career Readiness</span>
-            <p className="text-xs text-emerald-600 font-semibold mt-1">On Target</p>
+            <p className="text-xs text-emerald-600 font-semibold mt-1">API Verified</p>
           </div>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-slate-500 uppercase">Skills Mastered</span>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">12 / 20</div>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">
+            {data.skillsMasteredCount} / {data.totalSkillsCount}
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">Verified by assessment</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-slate-500 uppercase">Learning Hours</span>
-          <div className="text-2xl font-extrabold text-slate-900 mt-2">42.5 hrs</div>
-          <p className="text-xs text-indigo-600 font-semibold mt-0.5">+4.5 hrs this week</p>
+          <div className="text-2xl font-extrabold text-slate-900 mt-2">{data.learningHours} hrs</div>
+          <p className="text-xs text-indigo-600 font-semibold mt-0.5">Logged Learning Time</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-slate-500 uppercase">Current Streak</span>
           <div className="text-2xl font-extrabold text-slate-900 mt-2 flex items-center gap-1.5">
             <Flame className="w-6 h-6 text-amber-500 fill-amber-400" />
-            <span>5 Days</span>
+            <span>{data.streakDays} Days</span>
           </div>
           <p className="text-xs text-amber-600 font-semibold mt-0.5">Consistent Habit</p>
         </div>
       </div>
 
-      {/* Learning Rhythm Section & Supportive Workload Prompt (Requirement 18) */}
+      {/* Learning Rhythm Section */}
       <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white border border-slate-800 space-y-6 shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div>
@@ -121,57 +182,15 @@ export const ProgressPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-mono">
-            <span className="text-slate-400">Planned: <strong className="text-white">10 hrs/wk</strong></span>
-            <span className="text-slate-400">Actual: <strong className="text-indigo-400">6.5 hrs/wk</strong></span>
-            <span className="text-rose-400">Diff: -3.5 hrs</span>
+            <span className="text-slate-400">Planned: <strong className="text-white">{data.plannedWeeklyHours} hrs/wk</strong></span>
+            <span className="text-slate-400">Actual: <strong className="text-indigo-400">{data.actualWeeklyHours} hrs/wk</strong></span>
           </div>
         </div>
-
-        {/* Supportive Non-Shaming Workload Card (Requirement 18) */}
-        {!workloadAdjusted ? (
-          <div className="p-5 rounded-2xl bg-indigo-950/70 border border-indigo-700/60 space-y-3">
-            <div className="flex items-start gap-3">
-              <HeartHandshake className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-white">Need to adjust your study pace?</h4>
-                <p className="text-xs text-indigo-200 leading-relaxed">
-                  Your recent study schedule seems lighter than planned. That is completely okay! Would you like to adjust your weekly hours or extend your target completion date?
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button
-                onClick={() => setWorkloadAdjusted(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs"
-              >
-                Reduce Workload (7 hrs/wk)
-              </button>
-              <button
-                onClick={() => setWorkloadAdjusted(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700"
-              >
-                Extend Target Date (+2 wks)
-              </button>
-              <button
-                onClick={() => setWorkloadAdjusted(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700"
-              >
-                Keep Current Schedule
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-700/60 text-emerald-200 text-xs font-semibold flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Roadmap study pace updated smoothly. Zero penalties applied.</span>
-          </div>
-        )}
 
         {/* Weekly Bar Chart */}
         <div className="h-64 w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={weeklyRhythmData}>
+            <BarChart data={data.weeklyRhythm || []}>
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94A3B8' }} />
               <YAxis tick={{ fontSize: 11, fill: '#94A3B8' }} />
               <Tooltip contentStyle={{ borderRadius: '12px', background: '#0F172A', border: '1px solid #334155', color: '#fff', fontSize: '12px' }} />
@@ -187,7 +206,7 @@ export const ProgressPage: React.FC = () => {
         <h3 className="text-base font-bold text-slate-900">Diagnostic Assessment Score Trend</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <ReLineChart data={scoreTrendData}>
+            <ReLineChart data={data.scoreTrend || []}>
               <XAxis dataKey="quiz" tick={{ fontSize: 11, fill: '#64748B' }} />
               <YAxis domain={[40, 100]} tick={{ fontSize: 11, fill: '#64748B' }} />
               <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '12px' }} />

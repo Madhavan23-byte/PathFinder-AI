@@ -1,26 +1,76 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BrainCircuit, Lock, Mail, User, ArrowRight, PlayCircle } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import {
+  BrainCircuit,
+  Lock,
+  Mail,
+  User,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { loginAsDemoUser } = useApp();
+  const { signup } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  // Validation Rules
+  const nameValid = name.trim().length >= 2;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const hasMinLen = password.length >= 8;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const passwordValid = hasMinLen && hasUpper && hasLower && hasNumber;
+  const confirmMatch = password.length > 0 && password === confirmPassword;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    loginAsDemoUser();
-    navigate('/onboarding');
-  };
+    setApiError(null);
 
-  const handleDemoAccount = () => {
-    loginAsDemoUser();
-    navigate('/demo');
+    if (!nameValid) {
+      setApiError('Full Name must be at least 2 characters.');
+      return;
+    }
+    if (!emailValid) {
+      setApiError('Please enter a valid email address.');
+      return;
+    }
+    if (!passwordValid) {
+      setApiError('Password must contain at least 8 characters, including uppercase, lowercase, and numbers.');
+      return;
+    }
+    if (!confirmMatch) {
+      setApiError('Passwords do not match.');
+      return;
+    }
+    if (!agreeTerms) {
+      setApiError('You must agree to the Terms and Privacy Policy.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await signup(name.trim(), email.trim(), password);
+      navigate('/onboarding');
+    } catch (err: any) {
+      setApiError(err.message || 'Account registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -35,33 +85,18 @@ export const SignupPage: React.FC = () => {
             </div>
             <span className="text-2xl font-bold tracking-tight text-white">PathFinder</span>
           </NavLink>
-          <h1 className="text-lg font-bold text-slate-100">Create Learner Account</h1>
+          <h1 className="text-lg font-bold text-slate-100">Create Account</h1>
           <p className="text-xs text-slate-400">Start your personalized adaptive career path</p>
         </div>
 
-        <button
-          onClick={handleDemoAccount}
-          type="button"
-          className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border border-purple-500/50 hover:border-purple-400 text-purple-200 text-xs font-semibold flex items-center justify-between group transition-all"
-        >
-          <div className="flex items-center gap-2.5">
-            <PlayCircle className="w-4 h-4 text-purple-400" />
-            <div className="text-left">
-              <span className="block text-white font-bold">Skip Setup with Demo Account</span>
-              <span className="text-[10px] text-purple-300">Pre-populated ML Engineer Learner Profile</span>
-            </div>
+        {apiError && (
+          <div className="p-3.5 rounded-2xl bg-rose-950/80 border border-rose-800/80 text-rose-200 text-xs flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <span>{apiError}</span>
           </div>
-          <ArrowRight className="w-4 h-4 text-purple-300 group-hover:translate-x-1 transition-transform" />
-        </button>
+        )}
 
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-slate-700 w-full" />
-          <span className="bg-slate-800 px-3 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-            Or Register Below
-          </span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
             <div className="relative">
@@ -71,10 +106,14 @@ export const SignupPage: React.FC = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-                placeholder="Alex Johnson"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                placeholder="Enter your full name"
+                disabled={isSubmitting}
               />
             </div>
+            {name.length > 0 && !nameValid && (
+              <p className="text-[10px] text-rose-400 mt-1">Name must be at least 2 characters.</p>
+            )}
           </div>
 
           <div>
@@ -86,25 +125,55 @@ export const SignupPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-                placeholder="alex@university.edu"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                placeholder="Enter your email"
+                disabled={isSubmitting}
               />
             </div>
+            {email.length > 0 && !emailValid && (
+              <p className="text-[10px] text-rose-400 mt-1">Please enter a valid email format.</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Password</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">Create Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-                placeholder="Minimum 8 characters"
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                placeholder="Create a password"
+                disabled={isSubmitting}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
+
+            {/* Password Validation Checklist */}
+            {password.length > 0 && (
+              <div className="grid grid-cols-2 gap-1 pt-2 text-[10px]">
+                <span className={hasMinLen ? 'text-emerald-400 font-semibold' : 'text-slate-400'}>
+                  {hasMinLen ? '✓' : '○'} Min 8 characters
+                </span>
+                <span className={hasUpper ? 'text-emerald-400 font-semibold' : 'text-slate-400'}>
+                  {hasUpper ? '✓' : '○'} Uppercase letter
+                </span>
+                <span className={hasLower ? 'text-emerald-400 font-semibold' : 'text-slate-400'}>
+                  {hasLower ? '✓' : '○'} Lowercase letter
+                </span>
+                <span className={hasNumber ? 'text-emerald-400 font-semibold' : 'text-slate-400'}>
+                  {hasNumber ? '✓' : '○'} At least one number
+                </span>
+              </div>
+            )}
           </div>
 
           <div>
@@ -112,28 +181,50 @@ export const SignupPage: React.FC = () => {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-                placeholder="Repeat password"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                placeholder="Confirm your password"
+                disabled={isSubmitting}
               />
             </div>
+            {confirmPassword.length > 0 && !confirmMatch && (
+              <p className="text-[10px] text-rose-400 mt-1">Passwords do not match.</p>
+            )}
           </div>
+
+          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-400 pt-1">
+            <input
+              type="checkbox"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+              className="mt-0.5 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+            />
+            <span>I agree to the Terms and Privacy Policy</span>
+          </label>
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all"
+            disabled={isSubmitting}
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            Create Account & Begin Onboarding
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <span>Creating Account...</span>
+              </>
+            ) : (
+              <span>Create Account</span>
+            )}
           </button>
         </form>
 
         <p className="text-center text-xs text-slate-400">
           Already have an account?{' '}
           <NavLink to="/login" className="text-indigo-400 font-semibold hover:underline">
-            Log in
+            Sign in
           </NavLink>
         </p>
       </div>

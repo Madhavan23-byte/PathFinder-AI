@@ -1,15 +1,80 @@
-import React, { useState } from 'react';
-import { Users, Sparkles, Target, CheckCircle2, MessageSquare, UserCheck } from 'lucide-react';
-import { useApp } from '../context/AppContext';
-import { mockStudyPartners } from '../services/mockData';
+import React, { useEffect, useState } from 'react';
+import { Users, Sparkles, MessageSquare, UserCheck, AlertCircle, RefreshCw } from 'lucide-react';
+import { apiService } from '../services/api';
+import { StudyPartner } from '../types';
 
 export const CollaborationPage: React.FC = () => {
-  const { profile } = useApp();
+  const [partners, setPartners] = useState<StudyPartner[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [requestedPartners, setRequestedPartners] = useState<string[]>([]);
+
+  const fetchPartners = async () => {
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const data = await apiService.getPartners();
+      setPartners(data);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Unable to load study partner suggestions.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPartners();
+  }, []);
 
   const handleStudyRequest = (id: string) => {
     setRequestedPartners((prev) => [...prev, id]);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12 animate-pulse">
+        <div className="h-10 bg-slate-200 rounded-xl w-1/3" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-56 bg-slate-200 rounded-3xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
+        <h2 className="text-base font-bold text-slate-900">Unable to load study partners</h2>
+        <p className="text-xs text-slate-500">{errorMsg}</p>
+        <button
+          onClick={fetchPartners}
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry</span>
+        </button>
+      </div>
+    );
+  }
+
+  if (partners.length === 0) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+          <Users className="w-6 h-6" />
+        </div>
+        <div className="space-y-1 max-w-md mx-auto">
+          <h2 className="text-lg font-bold text-slate-900">No study partners matched yet</h2>
+          <p className="text-xs text-slate-500">
+            We'll suggest potential collaborators as your learning profile develops.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -35,7 +100,7 @@ export const CollaborationPage: React.FC = () => {
 
       {/* Partners Grid */}
       <div className="grid md:grid-cols-3 gap-6">
-        {mockStudyPartners.map((partner) => {
+        {partners.map((partner) => {
           const isRequested = requestedPartners.includes(partner.id);
 
           return (
@@ -46,7 +111,7 @@ export const CollaborationPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={partner.avatar}
+                    src={partner.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(partner.name)}&background=4F46E5&color=fff`}
                     alt={partner.name}
                     className="w-12 h-12 rounded-full object-cover border border-slate-200"
                   />
@@ -79,7 +144,7 @@ export const CollaborationPage: React.FC = () => {
                     Complementary Strengths:
                   </span>
                   <div className="flex flex-wrap gap-1">
-                    {partner.complementarySkills.map((sk, i) => (
+                    {(partner.complementarySkills || []).map((sk, i) => (
                       <span
                         key={i}
                         className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-medium"

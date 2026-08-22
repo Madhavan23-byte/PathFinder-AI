@@ -1,64 +1,92 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Target,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Sparkles,
-  ArrowRight,
   RefreshCw,
-  TrendingUp,
-  HelpCircle,
   BrainCircuit,
+  AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { apiService } from '../services/api';
-import { RootCauseDiagnosis } from '../types';
+import { AssessmentQuestion, RootCauseDiagnosis } from '../types';
 
 export const PracticePage: React.FC = () => {
+  const [question, setQuestion] = useState<AssessmentQuestion | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [rootCause, setRootCause] = useState<RootCauseDiagnosis | null>(null);
-  const [difficultyLevel, setDifficultyLevel] = useState<'Intermediate' | 'Advanced'>('Intermediate');
-  const [adaptationBanner, setAdaptationBanner] = useState<string | null>(null);
 
-  const questionData = {
-    concept: 'Model Evaluation — Confusion Matrix',
-    difficulty: difficultyLevel,
-    text: 'A Machine Learning model for fraud detection evaluates 1,000 transactions. It correctly identifies 90 fraudulent cases, misclassifies 10 fraudulent cases as legitimate, and flags 20 legitimate transactions as fraudulent. What is the Precision of the model?',
-    options: [
-      '81.8% (Precision = 90 / (90 + 20))',
-      '90.0% (Precision = 90 / (90 + 10))',
-      '75.0% (Precision = 90 / (90 + 30))',
-      '95.0% (Precision = 190 / 200)',
-    ],
-    correctIndex: 0,
-  };
-
-  const handleSubmit = async () => {
-    if (selectedOption === null) return;
-
-    setIsSubmitted(true);
-    const diagnosis = await apiService.diagnosePracticeAnswer(
-      'q_practice_01',
-      selectedOption,
-      questionData.correctIndex
-    );
-    setRootCause(diagnosis);
-
-    if (selectedOption === questionData.correctIndex) {
-      setDifficultyLevel('Advanced');
-      setAdaptationBanner('Performance: 100%! Dynamic AI scaled next question difficulty to Advanced.');
-    } else {
-      setAdaptationBanner('Performance: Needs Refinement. We will reinforce the algebraic step before scaling difficulty.');
-    }
-  };
-
-  const handlePracticeAgain = () => {
+  const fetchNextQuestion = async () => {
+    setIsLoading(true);
+    setErrorMsg(null);
     setSelectedOption(null);
     setIsSubmitted(false);
     setRootCause(null);
-    setAdaptationBanner(null);
+
+    try {
+      const q = await apiService.getNextPracticeQuestion();
+      setQuestion(q);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Unable to load practice question from backend.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchNextQuestion();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (selectedOption === null || !question) return;
+
+    setIsSubmitting(true);
+    try {
+      const diagnosis = await apiService.submitPracticeAnswer({
+        questionId: question.id,
+        selectedIndex: selectedOption,
+      });
+      setRootCause(diagnosis);
+      setIsSubmitted(true);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to submit practice response.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-pulse">
+        <div className="h-10 bg-slate-200 rounded-xl w-1/3" />
+        <div className="h-64 bg-slate-200 rounded-3xl" />
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="max-w-4xl mx-auto p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
+        <h2 className="text-base font-bold text-slate-900">Practice Error</h2>
+        <p className="text-xs text-slate-500">{errorMsg}</p>
+        <button
+          onClick={fetchNextQuestion}
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry</span>
+        </button>
+      </div>
+    );
+  }
+
+  if (!question) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -77,47 +105,37 @@ export const PracticePage: React.FC = () => {
         </div>
 
         <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700">
-          Difficulty: {difficultyLevel}
+          Difficulty: {question.difficulty}
         </span>
       </div>
 
-      {/* Adaptive Difficulty Banner (Requirement 16) */}
-      {adaptationBanner && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900 to-indigo-900 text-white border border-purple-700 flex items-center gap-3 shadow-md animate-in fade-in duration-200">
-          <Sparkles className="w-5 h-5 text-purple-300 shrink-0" />
-          <span className="text-xs font-semibold">{adaptationBanner}</span>
-        </div>
-      )}
-
-      {/* Main Practice Question Card */}
+      {/* Question Card */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-md space-y-6">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-            Concept: {questionData.concept}
+            Concept: {question.conceptTag}
           </span>
-          <span className="text-xs text-slate-400 font-mono">Question 1 of 1</span>
+          <span className="text-xs text-slate-400 font-mono">Skill: {question.skill}</span>
         </div>
 
-        <p className="text-sm font-semibold text-slate-900 leading-relaxed">{questionData.text}</p>
+        <p className="text-sm font-semibold text-slate-900 leading-relaxed">{question.question}</p>
+
+        {question.codeSnippet && (
+          <div className="p-4 rounded-2xl bg-slate-900 text-indigo-300 font-mono text-xs overflow-x-auto">
+            <pre>{question.codeSnippet}</pre>
+          </div>
+        )}
 
         {/* Options */}
         <div className="space-y-3">
-          {questionData.options.map((option, idx) => {
+          {question.options.map((option, idx) => {
             const isSelected = selectedOption === idx;
-            const isCorrectOption = idx === questionData.correctIndex;
-
             return (
               <div
                 key={idx}
                 onClick={() => !isSubmitted && setSelectedOption(idx)}
                 className={`p-4 rounded-2xl border text-xs font-semibold cursor-pointer transition-all flex items-center justify-between ${
-                  isSubmitted
-                    ? isCorrectOption
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-sm'
-                      : isSelected
-                      ? 'bg-rose-50 border-rose-400 text-rose-900'
-                      : 'bg-slate-50 border-slate-200 opacity-60'
-                    : isSelected
+                  isSelected
                     ? 'bg-indigo-600/10 border-indigo-600 text-indigo-950 shadow-md'
                     : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                 }`}
@@ -132,9 +150,6 @@ export const PracticePage: React.FC = () => {
                   </div>
                   <span>{option}</span>
                 </div>
-
-                {isSubmitted && isCorrectOption && <CheckCircle2 className="w-5 h-5 text-emerald-600" />}
-                {isSubmitted && isSelected && !isCorrectOption && <XCircle className="w-5 h-5 text-rose-600" />}
               </div>
             );
           })}
@@ -145,35 +160,45 @@ export const PracticePage: React.FC = () => {
           <div className="flex justify-end pt-2">
             <button
               onClick={handleSubmit}
-              disabled={selectedOption === null}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 disabled:opacity-40"
+              disabled={selectedOption === null || isSubmitting}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 disabled:opacity-40 flex items-center gap-2"
             >
-              Submit Answer
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Diagnosing...</span>
+                </>
+              ) : (
+                <span>Submit Answer</span>
+              )}
             </button>
           </div>
         )}
       </div>
 
-      {/* Root Cause Analysis Panel (Requirement 15) */}
+      {/* Backend Generated Root Cause Analysis Panel */}
       {isSubmitted && rootCause && (
         <div className="p-6 rounded-3xl bg-slate-900 text-white border border-slate-800 space-y-6 shadow-xl animate-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div className="flex items-center gap-2.5">
               <BrainCircuit className="w-5 h-5 text-purple-400" />
-              <h3 className="font-bold text-base text-white">Root Cause Diagnostic Breakdown</h3>
+              <h3 className="font-bold text-base text-white">Backend Root Cause Diagnosis</h3>
             </div>
             <span className="text-xs font-mono text-indigo-400">Diagnostic Verdict</span>
           </div>
 
-          {/* Granular Diagnostic Matrix */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
               <span className="text-[10px] text-slate-400 block mb-1">Concept Understanding</span>
-              <span className="font-bold text-emerald-400">✓ Correct</span>
+              <span className={`font-bold ${rootCause.conceptUnderstanding ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {rootCause.conceptUnderstanding ? '✓ Correct' : '✕ Gap'}
+              </span>
             </div>
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
               <span className="text-[10px] text-slate-400 block mb-1">Formula Selection</span>
-              <span className="font-bold text-emerald-400">✓ Correct</span>
+              <span className={`font-bold ${rootCause.formulaApplication ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {rootCause.formulaApplication ? '✓ Correct' : '✕ Error Point'}
+              </span>
             </div>
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
               <span className="text-[10px] text-slate-400 block mb-1">Algebraic Step</span>
@@ -183,7 +208,9 @@ export const PracticePage: React.FC = () => {
             </div>
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
               <span className="text-[10px] text-slate-400 block mb-1">Unit Conversion</span>
-              <span className="font-bold text-emerald-400">✓ Correct</span>
+              <span className={`font-bold ${rootCause.unitConversion ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {rootCause.unitConversion ? '✓ Correct' : '✕ Gap'}
+              </span>
             </div>
           </div>
 
@@ -194,11 +221,11 @@ export const PracticePage: React.FC = () => {
 
           <div className="flex justify-end gap-3 pt-2">
             <button
-              onClick={handlePracticeAgain}
-              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 flex items-center gap-1.5"
+              onClick={fetchNextQuestion}
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md flex items-center gap-1.5"
             >
               <RefreshCw className="w-4 h-4" />
-              <span>Practice Similar Question</span>
+              <span>Next Practice Question</span>
             </button>
           </div>
         </div>

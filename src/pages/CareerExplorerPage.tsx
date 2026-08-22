@@ -1,20 +1,68 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Compass,
-  Target,
-  Sparkles,
   CheckCircle2,
-  GitPullRequest,
-  TrendingUp,
   ArrowRight,
   ShieldCheck,
   Briefcase,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { apiService } from '../services/api';
 import { CareerRole } from '../types';
 
 export const CareerExplorerPage: React.FC = () => {
-  const { careers, activeCareerRole, updateUserTargetCareer } = useApp();
+  const [careers, setCareers] = useState<CareerRole[]>([]);
+  const [activeRole, setActiveRole] = useState<string>('car_mle');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const fetchCareers = async () => {
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const data = await apiService.getCareers();
+      setCareers(data);
+      if (data.length > 0) setActiveRole(data[0].id);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Unable to load career comparison tracks.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCareers();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12 animate-pulse">
+        <div className="h-10 bg-slate-200 rounded-xl w-1/3" />
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="h-64 bg-slate-200 rounded-3xl" />
+          <div className="h-64 bg-slate-200 rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
+        <h2 className="text-base font-bold text-slate-900 font-sans">Unable to load career tracks</h2>
+        <p className="text-xs text-slate-500">{errorMsg}</p>
+        <button
+          onClick={fetchCareers}
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -38,34 +86,10 @@ export const CareerExplorerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Non-Destructive Equation Banner */}
-      <div className="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-3">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">
-          PathFinder What-If Simulation Equation
-        </span>
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-medium text-slate-300">
-          <span className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-emerald-300">
-            Existing Skills
-          </span>
-          <span>+</span>
-          <span className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-indigo-300">
-            Completed Progress
-          </span>
-          <span>+</span>
-          <span className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-purple-300">
-            New Career Requirements
-          </span>
-          <span>=</span>
-          <span className="px-3 py-1.5 rounded-xl bg-cyan-950 border border-cyan-700 font-bold text-cyan-200">
-            Adapted Skill Gaps & Roadmap
-          </span>
-        </div>
-      </div>
-
       {/* Career Comparison Grid */}
       <div className="grid md:grid-cols-2 gap-6">
         {careers.map((role) => {
-          const isCurrentActive = role.id === activeCareerRole.id;
+          const isCurrentActive = role.id === activeRole;
 
           return (
             <div
@@ -85,14 +109,13 @@ export const CareerExplorerPage: React.FC = () => {
 
                   {isCurrentActive && (
                     <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold">
-                      Active Target Goal
+                      Selected Target
                     </span>
                   )}
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">{role.description}</p>
 
-                {/* Metrics Pill Grid */}
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                     <span className="text-[10px] text-slate-400 block">Career Fit</span>
@@ -108,22 +131,15 @@ export const CareerExplorerPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Key Skills Checklist */}
                 <div className="space-y-2">
                   <span className="text-[11px] font-bold text-slate-700 block">Skill Match Breakdown:</span>
                   <div className="space-y-1.5 text-xs">
-                    {role.keySkills.slice(0, 4).map((sk, i) => (
+                    {(role.keySkills || []).slice(0, 4).map((sk, i) => (
                       <div key={i} className="flex items-center justify-between text-[11px]">
                         <span className="text-slate-600 truncate">{sk.name}</span>
                         <div className="flex items-center gap-2 font-mono">
                           <span className="text-slate-400">Req: {sk.required}%</span>
-                          <span
-                            className={
-                              sk.userProficiency >= sk.required
-                                ? 'text-emerald-600 font-bold'
-                                : 'text-amber-600 font-semibold'
-                            }
-                          >
+                          <span className={sk.userProficiency >= sk.required ? 'text-emerald-600 font-bold' : 'text-amber-600 font-semibold'}>
                             You: {sk.userProficiency}%
                           </span>
                         </div>
@@ -133,7 +149,6 @@ export const CareerExplorerPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Target Switch Action */}
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div className="text-xs text-slate-500 font-mono">
                   {role.salaryRange} • {role.demandGrowth}
@@ -141,16 +156,15 @@ export const CareerExplorerPage: React.FC = () => {
 
                 {!isCurrentActive ? (
                   <button
-                    onClick={() => updateUserTargetCareer(role.id)}
+                    onClick={() => setActiveRole(role.id)}
                     className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 flex items-center gap-1.5"
                   >
-                    <span>Switch Goal to {role.title.split(' ')[0]}</span>
+                    <span>Switch Target</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
                   <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Currently Selected
+                    <CheckCircle2 className="w-4 h-4" /> Selected
                   </span>
                 )}
               </div>

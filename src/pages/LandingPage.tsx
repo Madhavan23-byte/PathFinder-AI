@@ -1,32 +1,17 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   BrainCircuit,
   Sparkles,
   ArrowRight,
   Target,
   Zap,
-  ShieldCheck,
   Award,
-  GitPullRequest,
   CheckCircle2,
-  PlayCircle,
   Activity,
-  Layers,
-  LineChart,
-  Compass,
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
 
 export const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { loginAsDemoUser } = useApp();
-
-  const handleDemoAccount = () => {
-    loginAsDemoUser();
-    navigate('/demo');
-  };
-
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-indigo-500 selection:text-white">
       {/* Top Navbar */}
@@ -49,18 +34,10 @@ export const LandingPage: React.FC = () => {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
             <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
             <a href="#adaptive-loop" className="hover:text-white transition-colors">Adaptive AI</a>
-            <a href="#explainable-ai" className="hover:text-white transition-colors">Explainable AI</a>
             <a href="#credentials" className="hover:text-white transition-colors">Badges</a>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleDemoAccount}
-              className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-purple-950/80 border border-purple-700/60 text-purple-200 hover:bg-purple-900 transition-all flex items-center gap-1.5"
-            >
-              <PlayCircle className="w-4 h-4 text-purple-400" />
-              <span>Explore Demo</span>
-            </button>
             <NavLink
               to="/login"
               className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
@@ -101,20 +78,19 @@ export const LandingPage: React.FC = () => {
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <NavLink
-              to="/onboarding"
+              to="/signup"
               className="px-7 py-3.5 text-sm font-bold rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xl shadow-indigo-600/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
             >
               <span>Start Your Journey</span>
               <ArrowRight className="w-4 h-4" />
             </NavLink>
 
-            <button
-              onClick={handleDemoAccount}
+            <NavLink
+              to="/login"
               className="px-7 py-3.5 text-sm font-bold rounded-2xl bg-slate-800/90 border border-slate-700 text-slate-200 hover:bg-slate-800 hover:border-purple-500/50 hover:text-white shadow-lg transition-all flex items-center gap-2"
             >
-              <PlayCircle className="w-4 h-4 text-purple-400 animate-pulse" />
-              <span>Explore Judge Demo Mode</span>
-            </button>
+              <span>Sign In to Account</span>
+            </NavLink>
           </div>
 
           {/* Adaptive Loop Diagram */}
@@ -213,72 +189,6 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Career Explorer & Badges Summary */}
-      <section id="credentials" className="py-20 px-6 lg:px-12 bg-slate-900">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              Verified Achievement
-            </span>
-            <h2 className="text-3xl font-bold text-white">
-              Demonstrated Mastery Micro-Credentials
-            </h2>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Earn shareable badges validated by diagnostic assessment accuracy rather than passive video watch time.
-            </p>
-
-            <div className="space-y-3">
-              {[
-                'Verified by diagnostic question accuracy thresholds (80%+)',
-                'Non-destructive target career role switching in simulator',
-                'Peer study partner matching based on complementary skills',
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 text-xs text-slate-300">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <NavLink
-              to="/onboarding"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-500 transition-colors"
-            >
-              Get Started Now
-            </NavLink>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-slate-800/80 border border-slate-700 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300">Badge Showcase Preview</span>
-              <span className="text-[10px] text-indigo-400 font-mono">5 Badges Tracked</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-700 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
-                  Py
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">Python Foundations</h4>
-                  <p className="text-[10px] text-emerald-400">90% Verified</p>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-700 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
-                  SQL
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">Relational Data</h4>
-                  <p className="text-[10px] text-emerald-400">85% Verified</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Footer */}
       <footer className="py-12 px-6 lg:px-12 bg-slate-950 border-t border-slate-800 text-center space-y-6">
         <h3 className="text-2xl font-bold text-white">Ready to Experience Truly Adaptive AI Learning?</h3>
@@ -289,14 +199,8 @@ export const LandingPage: React.FC = () => {
           >
             Create Account
           </NavLink>
-          <button
-            onClick={handleDemoAccount}
-            className="px-6 py-3 text-xs font-bold rounded-xl bg-purple-950 border border-purple-700 text-purple-200 hover:bg-purple-900 transition-colors"
-          >
-            Launch Hackathon Demo
-          </button>
         </div>
-        <p className="text-xs text-slate-500">PathFinder © 2026. Built for Hackathon Excellence.</p>
+        <p className="text-xs text-slate-500">PathFinder © 2026. Powered by FastAPI + MongoDB.</p>
       </footer>
     </div>
   );

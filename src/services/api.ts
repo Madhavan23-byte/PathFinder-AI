@@ -1,4 +1,6 @@
 import {
+  User,
+  AuthResponse,
   LearnerProfile,
   SkillGap,
   Recommendation,
@@ -6,196 +8,195 @@ import {
   CareerRole,
   Badge,
   StudyPartner,
+  DashboardData,
+  ProgressData,
+  AssessmentQuestion,
+  AssessmentResult,
   RootCauseDiagnosis,
 } from '../types';
 
-import {
-  mockLearnerProfile,
-  mockSkillGaps,
-  mockRecommendations,
-  mockRoadmapItems,
-  mockCareerRoles,
-  mockBadges,
-  mockStudyPartners,
-  mockAssessmentQuestions,
-} from './mockData';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+function getAuthToken(): string | null {
+  return localStorage.getItem('pathfinder_token');
+}
 
-async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
-  if (!API_BASE_URL) return null;
-  try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.warn(`[PathFinder API] Backend unreachable at ${API_BASE_URL}${endpoint}. Falling back to mock layer.`, err);
-    return null;
+export function setAuthToken(token: string | null) {
+  if (token) {
+    localStorage.setItem('pathfinder_token', token);
+  } else {
+    localStorage.removeItem('pathfinder_token');
   }
 }
 
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Server error (${response.status})`;
+    try {
+      const errData = await response.json();
+      if (errData && errData.detail) {
+        errorMessage = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+      } else if (errData && errData.message) {
+        errorMessage = errData.message;
+      }
+    } catch (_) {
+      // json parse fallback
+    }
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
 export const apiService = {
-  // Profile & Learner Model
-  async getLearnerProfile(): Promise<LearnerProfile> {
-    const data = await fetchAPI<LearnerProfile>('/api/profile');
-    return data || mockLearnerProfile;
-  },
-
-  async updateProfile(updates: Partial<LearnerProfile>): Promise<LearnerProfile> {
-    const data = await fetchAPI<LearnerProfile>('/api/profile', {
-      method: 'PUT',
-      body: JSON.stringify(updates),
+  // --- AUTHENTICATION API ---
+  async signup(data: { name: string; email: string; password: string }): Promise<AuthResponse> {
+    return request<AuthResponse>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
-    return data || { ...mockLearnerProfile, ...updates };
   },
 
-  // Skill Gaps & Career Roles
+  async login(data: { email: string; password: string }): Promise<AuthResponse> {
+    return request<AuthResponse>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async logout(): Promise<{ message: string }> {
+    try {
+      const res = await request<{ message: string }>('/api/auth/logout', { method: 'POST' });
+      setAuthToken(null);
+      return res;
+    } catch (e) {
+      setAuthToken(null);
+      return { message: 'Logged out' };
+    }
+  },
+
+  async getCurrentUser(): Promise<User> {
+    return request<User>('/api/auth/me');
+  },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return request<{ message: string }>('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  async resetPassword(data: { token: string; password: string }): Promise<{ message: string }> {
+    return request<{ message: string }>('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // --- DASHBOARD & PROFILE DATA API ---
+  async getDashboard(): Promise<DashboardData> {
+    return request<DashboardData>('/api/dashboard');
+  },
+
+  async getLearnerModel(): Promise<LearnerProfile> {
+    return request<LearnerProfile>('/api/learner-model');
+  },
+
   async getSkillGaps(): Promise<SkillGap[]> {
-    const data = await fetchAPI<SkillGap[]>('/api/skill-gaps');
-    return data || mockSkillGaps;
+    return request<SkillGap[]>('/api/skill-gaps');
   },
 
-  async getCareers(): Promise<CareerRole[]> {
-    const data = await fetchAPI<CareerRole[]>('/api/careers');
-    return data || mockCareerRoles;
-  },
-
-  // Recommendations
   async getRecommendations(): Promise<Recommendation[]> {
-    const data = await fetchAPI<Recommendation[]>('/api/recommendations');
-    return data || mockRecommendations;
+    return request<Recommendation[]>('/api/recommendations');
   },
 
-  // Roadmap & Adaptive Recalculation
   async getRoadmap(): Promise<RoadmapItem[]> {
-    const data = await fetchAPI<RoadmapItem[]>('/api/roadmap');
-    return data || mockRoadmapItems;
+    return request<RoadmapItem[]>('/api/roadmap');
   },
 
   async recalculateRoadmap(triggerReason?: string): Promise<{ success: boolean; updatedRoadmap: RoadmapItem[]; message: string }> {
-    const data = await fetchAPI<{ success: boolean; updatedRoadmap: RoadmapItem[]; message: string }>('/api/roadmap/recalculate', {
+    return request<{ success: boolean; updatedRoadmap: RoadmapItem[]; message: string }>('/api/roadmap/recalculate', {
       method: 'POST',
       body: JSON.stringify({ triggerReason }),
     });
-
-    if (data) return data;
-
-    // Simulated recalculation adjustment:
-    const reordered = [...mockRoadmapItems];
-    // Move Model Evaluation earlier
-    const evalIndex = reordered.findIndex(item => item.id === 'rd_05');
-    if (evalIndex !== -1) {
-      const [evalItem] = reordered.splice(evalIndex, 1);
-      evalItem.status = 'current';
-      evalItem.whyPositioned = 'ADAPTED: Prioritized based on recent assessment weakness in model evaluation trade-offs.';
-      reordered.splice(2, 0, evalItem);
-    }
-
-    return {
-      success: true,
-      updatedRoadmap: reordered,
-      message: 'Adaptive AI engine recalculated your learning path based on your latest accuracy & concept gap signals.',
-    };
   },
 
-  // Assessment & Practice
-  async submitAssessment(answers: Record<string, number>): Promise<{
-    score: number;
-    mastered: string[];
-    weaknesses: string[];
-    adaptiveFeedback: string;
-  }> {
-    const data = await fetchAPI<any>('/api/assessment/submit', {
+  // --- ASSESSMENT & PRACTICE API ---
+  async startAssessment(): Promise<AssessmentQuestion[]> {
+    return request<AssessmentQuestion[]>('/api/assessment/start');
+  },
+
+  async submitAssessment(answers: Record<string, number>): Promise<AssessmentResult> {
+    return request<AssessmentResult>('/api/assessment/submit', {
       method: 'POST',
       body: JSON.stringify({ answers }),
     });
+  },
 
-    if (data) return data;
+  async getAssessmentResult(attemptId: string): Promise<AssessmentResult> {
+    return request<AssessmentResult>(`/api/assessment/result/${attemptId}`);
+  },
 
-    let correctCount = 0;
-    const weaknesses: string[] = [];
-    const mastered: string[] = [];
+  async getNextPracticeQuestion(): Promise<AssessmentQuestion> {
+    return request<AssessmentQuestion>('/api/practice/next');
+  },
 
-    mockAssessmentQuestions.forEach((q) => {
-      if (answers[q.id] === q.correctAnswerIndex) {
-        correctCount++;
-        mastered.push(q.conceptTag);
-      } else if (answers[q.id] !== undefined) {
-        weaknesses.push(q.conceptTag);
-      }
+  async submitPracticeAnswer(data: { questionId: string; selectedIndex: number }): Promise<RootCauseDiagnosis> {
+    return request<RootCauseDiagnosis>('/api/practice/submit', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
-
-    const scorePct = Math.round((correctCount / mockAssessmentQuestions.length) * 100);
-
-    return {
-      score: scorePct,
-      mastered,
-      weaknesses: weaknesses.length > 0 ? weaknesses : ['Advanced Model Tuning'],
-      adaptiveFeedback: `Assessment complete (${scorePct}% score). Diagnostic model updated your skill gap matrix.`,
-    };
   },
 
-  async diagnosePracticeAnswer(questionId: string, selectedIndex: number, correctIndex: number): Promise<RootCauseDiagnosis> {
-    const isCorrect = selectedIndex === correctIndex;
-
-    if (isCorrect) {
-      return {
-        conceptUnderstanding: true,
-        formulaApplication: true,
-        algebraicStep: true,
-        unitConversion: true,
-        feedbackSummary: 'Perfect response! You correctly identified the core concept and mathematical logic.',
-        recommendedAction: 'Ready to advance to higher difficulty questions on this topic.',
-      };
-    }
-
-    // Granular root-cause diagnosis breakdown
-    return {
-      conceptUnderstanding: true,
-      formulaApplication: true,
-      algebraicStep: false,
-      unitConversion: true,
-      feedbackSummary: 'The core statistical concept appears correct! The error occurred during the algebraic step of calculating the False Positive Rate.',
-      recommendedAction: 'Practice 2 targeted algebra steps before attempting the full confusion matrix question again.',
-    };
+  // --- PROGRESS & BADGES API ---
+  async getProgress(): Promise<ProgressData> {
+    return request<ProgressData>('/api/progress');
   },
 
-  // Badges & Partners
   async getBadges(): Promise<Badge[]> {
-    const data = await fetchAPI<Badge[]>('/api/badges');
-    return data || mockBadges;
+    return request<Badge[]>('/api/badges');
   },
 
-  async getStudyPartners(): Promise<StudyPartner[]> {
-    const data = await fetchAPI<StudyPartner[]>('/api/partners');
-    return data || mockStudyPartners;
+  // --- USER PROFILE & CAREERS API ---
+  async getProfile(): Promise<LearnerProfile> {
+    return request<LearnerProfile>('/api/profile');
   },
 
-  // AI Chat Assistant
+  async updateProfile(updates: Partial<LearnerProfile>): Promise<LearnerProfile> {
+    return request<LearnerProfile>('/api/profile', {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  },
+
+  async getCareers(): Promise<CareerRole[]> {
+    return request<CareerRole[]>('/api/careers');
+  },
+
+  async getPartners(): Promise<StudyPartner[]> {
+    return request<StudyPartner[]>('/api/partners');
+  },
+
   async sendAIChat(message: string, context?: any): Promise<string> {
-    const data = await fetchAPI<{ response: string }>('/api/chat', {
+    const res = await request<{ response: string }>('/api/chat', {
       method: 'POST',
       body: JSON.stringify({ message, context }),
     });
-
-    if (data) return data.response;
-
-    // Smart contextual responses for demo
-    const msg = message.toLowerCase();
-    if (msg.includes('why') || msg.includes('statistics')) {
-      return 'Statistics forms the foundation for machine learning algorithms. Concepts like probability distributions, p-values, and hypothesis testing directly determine how model parameters are estimated and how loss functions evaluate uncertainty.';
-    } else if (msg.includes('explain') || msg.includes('differently') || msg.includes('simple')) {
-      return 'Think of overfitting like memorizing exam answers instead of learning the underlying concepts. When the test questions change slightly, a memorizer fails — just like an overfitted model fails on unseen validation data!';
-    } else if (msg.includes('code') || msg.includes('example')) {
-      return 'Here is a quick Python snippet for computing Precision and Recall using Scikit-Learn:\n\n```python\nfrom sklearn.metrics import precision_score, recall_score\n\ny_true = [0, 1, 1, 0, 1]\ny_pred = [0, 1, 0, 0, 1]\n\nprec = precision_score(y_true, y_pred)\nrec = recall_score(y_true, y_pred)\nprint(f"Precision: {prec:.2f}, Recall: {rec:.2f}")\n```';
-    }
-
-    return `Based on your current learner model for ${mockLearnerProfile.user.targetCareer}, focusing on ${mockLearnerProfile.knowledge.weakSkills[0]} will give you the highest career readiness bump (+12%). Let me know if you would like a code example or visual explanation!`;
+    return res.response;
   },
 };

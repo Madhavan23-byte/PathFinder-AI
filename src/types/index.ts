@@ -2,11 +2,16 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  avatar: string;
-  targetCareer: string;
-  education: string;
-  currentRole: string;
-  isDemoAccount?: boolean;
+  avatar?: string;
+  education?: string;
+  currentRole?: string;
+  targetCareer?: string;
+  createdAt?: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
 }
 
 export interface KnowledgeMetrics {
@@ -101,9 +106,18 @@ export interface AssessmentQuestion {
   question: string;
   codeSnippet?: string;
   options: string[];
-  correctAnswerIndex: number;
-  explanation: string;
+  correctAnswerIndex?: number;
+  explanation?: string;
   conceptTag: string;
+}
+
+export interface AssessmentResult {
+  attemptId: string;
+  score: number;
+  mastered: string[];
+  weaknesses: string[];
+  difficultyReached: string;
+  recommendedNextAction: string;
 }
 
 export interface RootCauseDiagnosis {
@@ -160,6 +174,33 @@ export interface Badge {
   iconName: string;
   verifiedByAssessment: boolean;
   isUnlocked: boolean;
+}
+
+export interface DashboardData {
+  targetCareer: string;
+  careerReadiness: number;
+  currentFocus: string;
+  roadmapProgress: number;
+  completedPhases: number;
+  totalPhases: number;
+  streakDays: number;
+  primaryRecommendation: Recommendation;
+  skillsOverview: { name: string; current: number; required: number }[];
+  recentRoadmap: RoadmapItem[];
+  plannedHours: number;
+  actualHours: number;
+}
+
+export interface ProgressData {
+  careerReadiness: number;
+  skillsMasteredCount: number;
+  totalSkillsCount: number;
+  learningHours: number;
+  streakDays: number;
+  plannedWeeklyHours: number;
+  actualWeeklyHours: number;
+  weeklyRhythm: { day: string; planned: number; actual: number }[];
+  scoreTrend: { quiz: string; score: number }[];
 }
 
 export interface StudyPartner {

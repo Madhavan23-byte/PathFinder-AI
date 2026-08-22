@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   BrainCircuit,
@@ -14,11 +14,10 @@ import {
   Users,
   User,
   Settings,
-  Flame,
-  PlayCircle,
+  LogOut,
   X,
 } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,13 +26,19 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const { profile } = useApp();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Learner Model', path: '/learner-model', icon: BrainCircuit, badge: 'AI' },
     { label: 'Skill Gaps', path: '/skill-gaps', icon: GitPullRequest },
-    { label: 'Recommendations', path: '/recommendations', icon: Sparkles, badge: 'New' },
+    { label: 'Recommendations', path: '/recommendations', icon: Sparkles },
     { label: 'Adaptive Roadmap', path: '/roadmap', icon: Map },
     { label: 'Learn Workspace', path: '/learn', icon: BookOpen },
     { label: 'Diagnostic Practice', path: '/practice', icon: Target },
@@ -45,9 +50,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { label: 'App Settings', path: '/settings', icon: Settings },
   ];
 
+  const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.name || 'PathFinder Learner'
+  )}&background=4F46E5&color=fff`;
+
   return (
     <>
-      {/* Mobile Backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden"
@@ -55,14 +63,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Sidebar Drawer */}
       <aside
         className={`fixed top-0 left-0 z-50 h-screen w-64 bg-slate-900 text-slate-100 flex flex-col justify-between border-r border-slate-800 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full overflow-hidden">
-          {/* Header / Brand Logo */}
+          {/* Header */}
           <div className="flex items-center justify-between px-5 py-5 border-b border-slate-800/80">
             <NavLink to="/dashboard" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
@@ -86,33 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Special Hackathon Demo Mode Callout */}
-          <div className="px-4 pt-4">
-            <NavLink
-              to="/demo"
-              onClick={onClose}
-              className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                location.pathname === '/demo'
-                  ? 'bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border-purple-500/50 text-white shadow-lg shadow-purple-500/10'
-                  : 'bg-slate-800/60 border-slate-700/60 text-slate-200 hover:bg-slate-800 hover:border-purple-500/40'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
-                  <PlayCircle className="w-4 h-4 animate-pulse" />
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-purple-200">Hackathon Demo</div>
-                  <div className="text-[10px] text-slate-400">Interactive Adaptation Loop</div>
-                </div>
-              </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 font-medium">
-                Try
-              </span>
-            </NavLink>
-          </div>
-
-          {/* Nav Items */}
+          {/* Navigation Items */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
             <div className="px-3 pb-2 text-[10px] uppercase font-bold tracking-wider text-slate-400">
               Navigation
@@ -152,23 +133,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             })}
           </nav>
 
-          {/* User Profile Mini Footer */}
-          <div className="p-4 border-t border-slate-800 bg-slate-950/60">
-            <div className="flex items-center gap-3">
-              <img
-                src={profile.user.avatar}
-                alt={profile.user.name}
-                className="w-10 h-10 rounded-full object-cover border border-slate-700 shadow-sm"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{profile.user.name}</p>
-                <p className="text-xs text-indigo-400 truncate">{profile.user.targetCareer}</p>
+          {/* Authenticated User Footer */}
+          <div className="p-4 border-t border-slate-800 bg-slate-950/60 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={user?.avatar || defaultAvatar}
+                  alt={user?.name || 'Learner'}
+                  className="w-9 h-9 rounded-full object-cover border border-slate-700 shadow-sm shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">{user?.name || 'Learner'}</p>
+                  <p className="text-[10px] text-indigo-400 truncate">{user?.email}</p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-1 text-amber-400 text-xs font-semibold bg-amber-950/40 border border-amber-800/40 px-2 py-1 rounded-lg">
-                <Flame className="w-3.5 h-3.5 fill-amber-400" />
-                <span>5d</span>
-              </div>
+              <button
+                onClick={handleLogout}
+                title="Logout"
+                className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>

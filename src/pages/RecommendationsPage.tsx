@@ -1,112 +1,100 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Sparkles,
   HelpCircle,
-  Clock,
-  BookOpen,
-  Target,
   ArrowRight,
   Star,
-  CheckCircle2,
-  Filter,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { apiService } from '../services/api';
 import { Recommendation } from '../types';
 import { WhyThisModal } from '../components/common/WhyThisModal';
 
 export const RecommendationsPage: React.FC = () => {
-  const { notifications } = useApp();
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>('All');
   const [selectedWhyRec, setSelectedWhyRec] = useState<Recommendation | null>(null);
 
-  const recommendationsList: Recommendation[] = [
-    {
-      id: 'rec_01',
-      title: 'Precision, Recall & ROC-AUC Deep Dive',
-      type: 'Practice',
-      skillGapClosed: 'Model Evaluation & Tuning',
-      difficulty: 'Intermediate',
-      estimatedTime: '45 mins',
-      prerequisites: [
-        { name: 'Python Foundations', status: 'met' },
-        { name: 'Statistics & Probability', status: 'partial' },
-      ],
-      careerRelevance: 'Critical',
-      whyReason: {
-        strongSkills: ['Python Foundations', 'SQL Queries'],
-        partiallyMastered: ['Statistics'],
-        careerRequirement: 'Machine Learning Engineer role requires 80%+ evaluation mastery.',
-        recentGapTrigger: 'Your recent diagnostic test showed ambiguity between Type I and Type II error trade-offs.',
-      },
-      provider: 'PathFinder Interactive Lab',
-      rating: 4.9,
-    },
-    {
-      id: 'rec_02',
-      title: 'Hands-on Customer Churn Classifier Project',
-      type: 'Project',
-      skillGapClosed: 'Machine Learning Fundamentals',
-      difficulty: 'Intermediate',
-      estimatedTime: '3.5 hours',
-      prerequisites: [
-        { name: 'Python Foundations', status: 'met' },
-        { name: 'SQL', status: 'met' },
-      ],
-      careerRelevance: 'High',
-      whyReason: {
-        strongSkills: ['Python', 'SQL'],
-        partiallyMastered: ['Supervised Learning'],
-        careerRequirement: 'Builds portfolio evidence for end-to-end classification pipeline.',
-        recentGapTrigger: 'Matches your preferred "Hands-on Projects" learning style.',
-      },
-      provider: 'PathFinder Capstone Studio',
-      rating: 4.8,
-    },
-    {
-      id: 'rec_03',
-      title: 'Cross-Validation & Grid Search Optimization',
-      type: 'Course',
-      skillGapClosed: 'Model Evaluation & Tuning',
-      difficulty: 'Intermediate',
-      estimatedTime: '2 hours',
-      prerequisites: [
-        { name: 'Python', status: 'met' },
-        { name: 'Statistics', status: 'partial' },
-      ],
-      careerRelevance: 'High',
-      whyReason: {
-        strongSkills: ['Python Foundations'],
-        partiallyMastered: ['Overfitting Diagnosis'],
-        careerRequirement: 'Prevents data leakage in industrial ML models.',
-        recentGapTrigger: 'Identified as a high-velocity concept based on your learning speed.',
-      },
-      provider: 'Scikit-Learn Mastery Series',
-      rating: 4.7,
-    },
-    {
-      id: 'rec_04',
-      title: 'Adaptive Diagnostic Review: Linear Algebra Basics',
-      type: 'Revision',
-      skillGapClosed: 'Statistics & Probability',
-      difficulty: 'Beginner',
-      estimatedTime: '30 mins',
-      prerequisites: [{ name: 'Python', status: 'met' }],
-      careerRelevance: 'Medium',
-      whyReason: {
-        strongSkills: ['Python'],
-        partiallyMastered: ['Matrix Operations'],
-        careerRequirement: 'Required for neural network weight multiplications.',
-        recentGapTrigger: 'Refreshes vectors before PyTorch Deep Learning module.',
-      },
-      provider: 'PathFinder Refresher',
-      rating: 4.9,
-    },
-  ];
+  const fetchRecommendations = async () => {
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const data = await apiService.getRecommendations();
+      setRecommendations(data);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'We couldn\'t load your recommendations. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, []);
 
   const filteredRecs = filterType === 'All'
-    ? recommendationsList
-    : recommendationsList.filter((r) => r.type === filterType);
+    ? recommendations
+    : recommendations.filter((r) => r.type === filterType);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12 animate-pulse">
+        <div className="h-10 bg-slate-200 rounded-xl w-1/3" />
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="h-48 bg-slate-200 rounded-2xl" />
+          <div className="h-48 bg-slate-200 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-base font-bold text-slate-900">Unable to load recommendations</h2>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">{errorMsg}</p>
+        </div>
+        <button
+          onClick={fetchRecommendations}
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry</span>
+        </button>
+      </div>
+    );
+  }
+
+  if (recommendations.length === 0) {
+    return (
+      <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-4 my-12">
+        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+          <Sparkles className="w-6 h-6" />
+        </div>
+        <div className="space-y-1 max-w-md mx-auto">
+          <h2 className="text-lg font-bold text-slate-900">No recommendations available</h2>
+          <p className="text-xs text-slate-500">
+            Complete your profile and diagnostic assessment to receive personalized recommendations.
+          </p>
+        </div>
+        <NavLink
+          to="/assessment"
+          className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 shadow-md inline-flex items-center gap-2"
+        >
+          <span>Start Assessment</span>
+          <ArrowRight className="w-4 h-4" />
+        </NavLink>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -169,7 +157,7 @@ export const RecommendationsPage: React.FC = () => {
 
               {/* Prerequisites check */}
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {rec.prerequisites.map((p, i) => (
+                {(rec.prerequisites || []).map((p, i) => (
                   <span
                     key={i}
                     className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
@@ -185,7 +173,6 @@ export const RecommendationsPage: React.FC = () => {
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-              {/* Visible Why Button (Requirement 12) */}
               <button
                 onClick={() => setSelectedWhyRec(rec)}
                 className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
