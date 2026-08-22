@@ -37,7 +37,7 @@ export interface BehaviorMetrics {
 }
 
 export interface PreferenceMetrics {
-  resourceTypes: ('Video' | 'Text' | 'Visual' | 'Interactive' | 'Projects' | 'Quizzes')[];
+  resourceTypes: ('Video' | 'Text' | 'Visual' | 'Hands-on practice' | 'Interactive' | 'Projects' | 'Quizzes')[];
   explanationFormats: ('Step-by-step' | 'Conceptual' | 'Code-first' | 'Visual Diagram' | 'Analogy')[];
 }
 
