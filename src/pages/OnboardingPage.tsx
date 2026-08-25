@@ -13,11 +13,8 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
-
 export const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { profile } = useApp();
 
   const [currentStep, setCurrentStep] = useState(1);
 

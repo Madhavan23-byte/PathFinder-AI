@@ -27,7 +27,7 @@ export const SkillGapsPage: React.FC = () => {
     try {
       const [gapsData, profileData] = await Promise.all([
         apiService.getSkillGaps(),
-        apiService.getLearnerProfile(),
+        apiService.getLearnerModel(),
       ]);
       setSkillGaps(gapsData);
       setProfile(profileData);
