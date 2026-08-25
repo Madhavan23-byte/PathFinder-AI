@@ -127,6 +127,10 @@ export const apiService = {
     return request<LearnerProfile>('/api/learner-model');
   },
 
+  async getLearnerProfile(): Promise<LearnerProfile> {
+    return request<LearnerProfile>('/api/learner-model');
+  },
+
   async getSkillGaps(): Promise<SkillGap[]> {
     return request<SkillGap[]>('/api/skill-gaps');
   },

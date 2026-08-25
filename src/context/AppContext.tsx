@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
-import { NotificationItem, CareerRole } from '../types';
+import { NotificationItem, CareerRole, LearnerProfile } from '../types';
 
 interface AppContextType {
+  profile?: LearnerProfile | null;
   notifications: NotificationItem[];
   unreadCount: number;
   demoStep: number;
