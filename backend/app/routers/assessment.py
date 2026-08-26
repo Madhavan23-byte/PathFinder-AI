@@ -126,68 +126,54 @@ def submit_assessment(data: AssessmentSubmitSchema, user_id: str = Depends(get_c
             "careerRelevance": "Core competence required for supervised and unsupervised algorithmic modeling.",
         },
     ])
-
-    # 4. Populate recommendations
+    # 4. Populate recommendations dynamically
+    from backend.app.core.recommendation import recommend_resources
+    from backend.app.core.llm import generate_why_reason, generate_roadmap
+    
     recommendations_collection.delete_many({"user_id": user_id})
-    recommendations_collection.insert_many([
-        {
-            "user_id": user_id, "id": "rec_01",
-            "title": "Precision, Recall & ROC-AUC Deep Dive", "type": "Practice",
-            "skillGapClosed": "Model Evaluation & Tuning", "difficulty": "Intermediate",
-            "estimatedTime": "45 mins",
-            "prerequisites": [
-                {"name": "Python Foundations", "status": "met"},
-                {"name": "Statistics & Probability", "status": "partial"},
-            ],
-            "careerRelevance": "Critical",
-            "whyReason": {
-                "strongSkills": ["Python Foundations"],
-                "partiallyMastered": ["Statistics"],
-                "careerRequirement": "ML Engineer role requires 80%+ evaluation mastery.",
-                "recentGapTrigger": f"Diagnostic score ({score}%) identified precision/recall evaluation trade-offs as high priority.",
-            },
-            "provider": "PathFinder Interactive Lab", "rating": 4.9,
-        },
-        {
-            "user_id": user_id, "id": "rec_02",
-            "title": "Hands-on Customer Churn Classifier Project", "type": "Project",
-            "skillGapClosed": "Machine Learning Fundamentals", "difficulty": "Intermediate",
-            "estimatedTime": "3.5 hours",
-            "prerequisites": [
-                {"name": "Python Foundations", "status": "met"},
-                {"name": "SQL", "status": "met"},
-            ],
-            "careerRelevance": "High",
-            "whyReason": {
-                "strongSkills": ["Python", "SQL"],
-                "partiallyMastered": ["Supervised Learning"],
-                "careerRequirement": "Builds portfolio evidence for end-to-end classification pipeline.",
-                "recentGapTrigger": "Matches your preferred Hands-on Projects learning style.",
-            },
-            "provider": "PathFinder Capstone Studio", "rating": 4.8,
-        },
-    ])
+    target_gaps = ["Model Evaluation & Tuning", "Machine Learning Fundamentals"] if score < 75 else ["Advanced MLOps", "Deep Learning"]
+    
+    new_recs = []
+    for idx, gap in enumerate(target_gaps):
+        matched_courses = recommend_resources(gap, top_n=1)
+        if matched_courses:
+            course = matched_courses[0]
+            why_json = generate_why_reason(gap, "Machine Learning Engineer", {"Python": 90, "SQL": 85})
+            new_recs.append({
+                "user_id": user_id, "id": f"rec_{idx+1:02d}",
+                "title": course.get("title", gap + " Course"),
+                "type": course.get("type", "Course"),
+                "skillGapClosed": gap,
+                "difficulty": course.get("difficulty", "Intermediate"),
+                "estimatedTime": course.get("estimatedTime", "5 hours"),
+                "prerequisites": [{"name": "Python Foundations", "status": "met"}],
+                "careerRelevance": "High",
+                "whyReason": why_json,
+                "provider": course.get("provider", "PathFinder Lab"),
+                "rating": course.get("rating", 4.8),
+            })
+    if new_recs:
+        recommendations_collection.insert_many(new_recs)
 
-    # 5. Populate roadmap
+    # 5. Populate roadmap dynamically
     roadmaps_collection.delete_many({"user_id": user_id})
-    roadmaps_collection.insert_many([
-        {"user_id": user_id, "id": "rd_01", "title": "Python Core & Data Wrangling",
-         "skillName": "Python Foundations", "phase": 1, "phaseTitle": "Foundations & Data Stack",
-         "order": 1, "status": "completed", "estimatedHours": 15, "difficulty": "Beginner",
-         "resourcesCount": 6, "whyPositioned": "Verified initial proficiency in diagnostic assessment."},
-        {"user_id": user_id, "id": "rd_02", "title": "SQL & Relational Data Engineering",
-         "skillName": "SQL & Database Design", "phase": 1, "phaseTitle": "Foundations & Data Stack",
-         "order": 2, "status": "completed", "estimatedHours": 12, "difficulty": "Beginner",
-         "resourcesCount": 4, "whyPositioned": "Verified SQL mastery in diagnostic assessment."},
-        {"user_id": user_id, "id": "rd_03", "title": "Applied Statistics & Probability for ML",
-         "skillName": "Statistics & Probability", "phase": 2, "phaseTitle": "Mathematical Rigor",
-         "order": 3, "status": "current", "estimatedHours": 10, "difficulty": "Intermediate",
-         "resourcesCount": 5, "whyPositioned": "Targeted gap: Needed for hypothesis testing."},
-        {"user_id": user_id, "id": "rd_04", "title": "Supervised Learning & Regression Systems",
-         "skillName": "Machine Learning Fundamentals", "phase": 3, "phaseTitle": "Core Machine Learning",
-         "order": 4, "status": "current", "estimatedHours": 18, "difficulty": "Intermediate",
-         "resourcesCount": 8, "whyPositioned": "Direct milestone towards ML Engineer goal."},
-    ])
+    llm_roadmap = generate_roadmap("Machine Learning Engineer", target_gaps)
+    
+    if llm_roadmap and isinstance(llm_roadmap, list):
+        final_roadmap = []
+        for i, rm in enumerate(llm_roadmap):
+            rm["user_id"] = user_id
+            rm["id"] = f"rd_{i+1:02d}"
+            rm["order"] = i + 1
+            rm["status"] = "completed" if i == 0 else "current" if i == 1 else "locked"
+            final_roadmap.append(rm)
+        roadmaps_collection.insert_many(final_roadmap)
+    else:
+        # Fallback if LLM fails (API key missing or bad JSON)
+        roadmaps_collection.insert_many([
+            {"user_id": user_id, "id": "rd_01", "title": "Python Core", "skillName": "Python Foundations", "phase": 1, "phaseTitle": "Foundations", "order": 1, "status": "completed", "estimatedHours": 10, "difficulty": "Beginner", "resourcesCount": 3, "whyPositioned": "Verified initial proficiency in diagnostic assessment."},
+            {"user_id": user_id, "id": "rd_02", "title": target_gaps[0], "skillName": target_gaps[0], "phase": 2, "phaseTitle": "Core Skills", "order": 2, "status": "current", "estimatedHours": 15, "difficulty": "Intermediate", "resourcesCount": 5, "whyPositioned": "Primary skill gap detected."}
+        ])
 
     # 6. Update progress
     progress_collection.update_one(

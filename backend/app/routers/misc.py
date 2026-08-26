@@ -92,27 +92,11 @@ def get_learning_sessions(user_id: str = Depends(get_current_user_id)):
 @router.post("/chat")
 def ai_chat(data: ChatSchema, user_id: str = Depends(get_current_user_id)):
     """
-    Rule-based AI chat assistant.
-    TODO: Replace with LLM integration (e.g., Gemini API or OpenAI).
+    AI chat assistant powered by Gemini.
     """
-    msg = data.message.lower()
-    if "why" in msg or "statistics" in msg:
-        resp = (
-            "Statistics forms the foundation for machine learning algorithms. "
-            "Concepts like probability distributions and hypothesis testing directly "
-            "determine how model parameters are estimated."
-        )
-    elif "code" in msg or "example" in msg:
-        resp = (
-            "Here is a Python snippet for computing Precision and Recall:\n\n"
-            "```python\nfrom sklearn.metrics import precision_score, recall_score\n"
-            "y_true = [0, 1, 1, 0, 1]\ny_pred = [0, 1, 0, 0, 1]\n"
-            "print(precision_score(y_true, y_pred))\n```"
-        )
-    else:
-        resp = (
-            "Based on your active learner model, focusing on Model Evaluation will give you "
-            "the highest career readiness increase. Let me know if you would like a code example "
-            "or visual explanation!"
-        )
+    from backend.app.core.llm import generate_chat_response
+    
+    # In a real app, we would fetch the user's learner model here and pass it as context.
+    # For now, we just pass the context provided by the frontend if any.
+    resp = generate_chat_response(data.message, context=data.context)
     return {"response": resp}

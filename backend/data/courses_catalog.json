@@ -1,0 +1,134 @@
+[
+  {
+    "id": "crs_001",
+    "title": "Python for Data Science Bootcamp",
+    "type": "Course",
+    "provider": "PathFinder Interactive Lab",
+    "difficulty": "Beginner",
+    "estimatedTime": "15 hours",
+    "rating": 4.8,
+    "tags": ["Python", "Data Structures", "Pandas", "NumPy", "Data Wrangling", "Foundations"],
+    "description": "Master the fundamentals of Python programming for data analysis. Covers variables, data structures (lists, dictionaries, sets), functions, and an introduction to pandas for data manipulation."
+  },
+  {
+    "id": "crs_002",
+    "title": "Advanced Python Patterns & Algorithms",
+    "type": "Course",
+    "provider": "TechAcademy",
+    "difficulty": "Advanced",
+    "estimatedTime": "10 hours",
+    "rating": 4.9,
+    "tags": ["Python", "Algorithms", "Optimization", "Advanced"],
+    "description": "Deep dive into advanced Python concepts like decorators, generators, memory management, and optimizing algorithmic complexity for high-performance data pipelines."
+  },
+  {
+    "id": "crs_003",
+    "title": "SQL Aggregations & Window Functions",
+    "type": "Practice",
+    "provider": "PathFinder Interactive Lab",
+    "difficulty": "Intermediate",
+    "estimatedTime": "4 hours",
+    "rating": 4.7,
+    "tags": ["SQL", "Relational Databases", "Aggregations", "Data Modeling"],
+    "description": "Learn to write complex SQL queries using GROUP BY, HAVING, subqueries, and advanced window functions to aggregate and analyze relational data efficiently."
+  },
+  {
+    "id": "crs_004",
+    "title": "Statistics for Machine Learning",
+    "type": "Course",
+    "provider": "StatPrep",
+    "difficulty": "Intermediate",
+    "estimatedTime": "12 hours",
+    "rating": 4.6,
+    "tags": ["Statistics", "Probability", "Hypothesis Testing", "Mathematics"],
+    "description": "A comprehensive guide to statistics required for machine learning. Covers probability distributions, Bayes' theorem, p-values, A/B testing, and hypothesis testing."
+  },
+  {
+    "id": "crs_005",
+    "title": "Applied Linear Algebra for Data Scientists",
+    "type": "Course",
+    "provider": "MathML",
+    "difficulty": "Intermediate",
+    "estimatedTime": "8 hours",
+    "rating": 4.5,
+    "tags": ["Mathematics", "Linear Algebra", "Matrices", "Vectors"],
+    "description": "Understand the mathematical foundations behind machine learning algorithms. Focuses on matrix operations, eigenvalues, eigenvectors, and dimensionality reduction techniques like PCA."
+  },
+  {
+    "id": "crs_006",
+    "title": "Machine Learning Fundamentals",
+    "type": "Course",
+    "provider": "PathFinder Interactive Lab",
+    "difficulty": "Intermediate",
+    "estimatedTime": "20 hours",
+    "rating": 4.9,
+    "tags": ["Machine Learning", "Supervised Learning", "Regression", "Classification"],
+    "description": "Core concepts of supervised and unsupervised learning. Build linear regression, logistic regression, decision trees, and k-means clustering models from scratch."
+  },
+  {
+    "id": "crs_007",
+    "title": "Precision, Recall & ROC-AUC Deep Dive",
+    "type": "Practice",
+    "provider": "PathFinder Interactive Lab",
+    "difficulty": "Intermediate",
+    "estimatedTime": "2 hours",
+    "rating": 4.8,
+    "tags": ["Model Evaluation", "Tuning", "Metrics", "Imbalanced Classification"],
+    "description": "Interactive exercises focused solely on model evaluation metrics. Learn when to optimize for Precision vs Recall, how to plot ROC curves, and how to handle imbalanced datasets."
+  },
+  {
+    "id": "crs_008",
+    "title": "Hyperparameter Tuning with GridSearch & RandomSearch",
+    "type": "Course",
+    "provider": "MLExpert",
+    "difficulty": "Advanced",
+    "estimatedTime": "5 hours",
+    "rating": 4.7,
+    "tags": ["Model Evaluation", "Tuning", "Optimization", "Overfitting"],
+    "description": "Learn to systematically improve model performance by tuning hyperparameters using Grid Search, Random Search, and Bayesian Optimization. Identify and resolve overfitting."
+  },
+  {
+    "id": "crs_009",
+    "title": "Hands-on Customer Churn Classifier",
+    "type": "Project",
+    "provider": "PathFinder Capstone Studio",
+    "difficulty": "Intermediate",
+    "estimatedTime": "6 hours",
+    "rating": 4.9,
+    "tags": ["Machine Learning", "Classification", "Project", "Supervised Learning"],
+    "description": "An end-to-end guided project where you clean telecom data, engineer features, train a Random Forest classifier, evaluate its performance, and extract feature importance to predict customer churn."
+  },
+  {
+    "id": "crs_010",
+    "title": "Introduction to Deep Learning & Neural Networks",
+    "type": "Course",
+    "provider": "DeepAI",
+    "difficulty": "Advanced",
+    "estimatedTime": "25 hours",
+    "rating": 4.9,
+    "tags": ["Deep Learning", "Neural Networks", "TensorFlow", "PyTorch", "AI"],
+    "description": "Step into modern AI with this introductory deep learning course. Covers perceptrons, backpropagation, activation functions, and building multi-layer neural networks using PyTorch."
+  },
+  {
+    "id": "crs_011",
+    "title": "Feature Engineering Masterclass",
+    "type": "Course",
+    "provider": "DataPrep",
+    "difficulty": "Intermediate",
+    "estimatedTime": "10 hours",
+    "rating": 4.6,
+    "tags": ["Feature Engineering", "Data Preprocessing", "Data Wrangling"],
+    "description": "The secret to highly accurate models is great features. Learn imputation, handling outliers, encoding categorical variables, scaling, and generating polynomial features."
+  },
+  {
+    "id": "crs_012",
+    "title": "Building CI/CD Pipelines for ML Models",
+    "type": "Course",
+    "provider": "MLOps Institute",
+    "difficulty": "Advanced",
+    "estimatedTime": "15 hours",
+    "rating": 4.8,
+    "tags": ["MLOps", "Deployment", "CI/CD", "Docker", "Model Evaluation"],
+    "description": "Bridge the gap between ML and software engineering. Learn to package models using Docker, set up GitHub Actions for testing, and deploy models as REST APIs using FastAPI."
+  }
+]
