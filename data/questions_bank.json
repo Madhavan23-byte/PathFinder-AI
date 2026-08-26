@@ -1,0 +1,135 @@
+[
+  {
+    "id": "q1",
+    "skill": "Python Foundations",
+    "difficulty": "Easy",
+    "question": "Which Python data structure maintains insertion order and guarantees unique keys?",
+    "options": ["List", "Dictionary (Python 3.7+)", "Set", "Tuple"],
+    "correctIndex": 1,
+    "conceptTag": "Data Structures"
+  },
+  {
+    "id": "q2",
+    "skill": "Statistics & Probability",
+    "difficulty": "Intermediate",
+    "question": "When evaluating a binary classifier with high class imbalance, which metric is LEAST informative?",
+    "options": ["ROC-AUC", "Precision-Recall AUC", "Standard Classification Accuracy", "F1-Score"],
+    "correctIndex": 2,
+    "conceptTag": "Evaluation Metrics"
+  },
+  {
+    "id": "q3",
+    "skill": "Model Evaluation & Tuning",
+    "difficulty": "Intermediate",
+    "question": "A Decision Tree model displays 99% training accuracy but 62% validation accuracy. What phenomenon is occurring?",
+    "options": ["Underfitting", "Overfitting (High Variance)", "Optimal Convergence", "Data Leakage"],
+    "correctIndex": 1,
+    "conceptTag": "Overfitting vs Underfitting"
+  },
+  {
+    "id": "q4",
+    "skill": "SQL & Relational Databases",
+    "difficulty": "Easy",
+    "question": "Which SQL clause is used to filter records resulting from an aggregate function (e.g., GROUP BY)?",
+    "options": ["WHERE", "HAVING", "ORDER BY", "FILTER"],
+    "correctIndex": 1,
+    "conceptTag": "SQL Aggregations"
+  },
+  {
+    "id": "q5",
+    "skill": "Machine Learning Fundamentals",
+    "difficulty": "Intermediate",
+    "question": "Which regularization technique adds the sum of the absolute values of coefficients to the loss function?",
+    "options": ["Ridge (L2)", "Lasso (L1)", "Elastic Net", "Dropout"],
+    "correctIndex": 1,
+    "conceptTag": "Regularization"
+  },
+  {
+    "id": "q6",
+    "skill": "Deep Learning",
+    "difficulty": "Advanced",
+    "question": "In a neural network, what is the purpose of the ReLU activation function?",
+    "options": [
+      "Normalize input values to [0,1]",
+      "Introduce non-linearity by zeroing negative values",
+      "Reduce dimensionality of the input",
+      "Prevent overfitting by randomly dropping neurons"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Activation Functions"
+  },
+  {
+    "id": "q7",
+    "skill": "Feature Engineering",
+    "difficulty": "Intermediate",
+    "question": "Which technique is most appropriate for handling highly skewed numeric features before training a linear model?",
+    "options": ["One-hot encoding", "Log transformation", "Label encoding", "Polynomial features"],
+    "correctIndex": 1,
+    "conceptTag": "Data Preprocessing"
+  },
+  {
+    "id": "q8",
+    "skill": "Python Foundations",
+    "difficulty": "Easy",
+    "question": "What does the pandas method `df.dropna()` do?",
+    "options": [
+      "Fills missing values with zero",
+      "Removes rows containing NaN values",
+      "Drops all columns with missing data",
+      "Replaces NaN with the column mean"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Data Wrangling"
+  },
+  {
+    "id": "q9",
+    "skill": "Statistics & Probability",
+    "difficulty": "Intermediate",
+    "question": "What does a p-value of 0.03 indicate in hypothesis testing (α = 0.05)?",
+    "options": [
+      "Accept the null hypothesis",
+      "Reject the null hypothesis",
+      "The result is inconclusive",
+      "The effect size is large"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Hypothesis Testing"
+  },
+  {
+    "id": "q10",
+    "skill": "SQL & Relational Databases",
+    "difficulty": "Intermediate",
+    "question": "Which JOIN returns all records from the left table and matched records from the right table?",
+    "options": ["INNER JOIN", "RIGHT JOIN", "LEFT JOIN", "FULL OUTER JOIN"],
+    "correctIndex": 2,
+    "conceptTag": "SQL Joins"
+  },
+  {
+    "id": "q11",
+    "skill": "Model Evaluation & Tuning",
+    "difficulty": "Advanced",
+    "question": "What is the primary advantage of k-fold cross-validation over a single train/test split?",
+    "options": [
+      "It is faster to compute",
+      "It provides a more reliable estimate of model generalization",
+      "It requires less data",
+      "It prevents data leakage"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Cross Validation"
+  },
+  {
+    "id": "q12",
+    "skill": "Machine Learning Fundamentals",
+    "difficulty": "Advanced",
+    "question": "In gradient boosting, each new tree is trained to correct the errors of which component?",
+    "options": [
+      "The initial training data",
+      "The residual errors of the ensemble so far",
+      "A random subset of the training data",
+      "The validation set predictions"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Ensemble Methods"
+  }
+]

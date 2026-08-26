@@ -1,0 +1,64 @@
+[
+  {
+    "id": "car_mle",
+    "title": "Machine Learning Engineer",
+    "description": "Designs, builds, and deploys production machine learning pipelines and deep learning systems.",
+    "matchScore": 84,
+    "readinessScore": 74,
+    "estimatedMonths": 3,
+    "salaryRange": "$120,000 - $175,000",
+    "demandGrowth": "+34% YoY",
+    "keySkills": [
+      { "name": "Python Foundations", "required": 85, "userProficiency": 90 },
+      { "name": "SQL & Database Design", "required": 75, "userProficiency": 85 },
+      { "name": "Statistics & Probability", "required": 80, "userProficiency": 55 },
+      { "name": "Model Evaluation & Tuning", "required": 80, "userProficiency": 30 }
+    ]
+  },
+  {
+    "id": "car_ds",
+    "title": "Data Scientist",
+    "description": "Extracts strategic business insights using statistical analysis, predictive modeling, and data story-telling.",
+    "matchScore": 88,
+    "readinessScore": 76,
+    "estimatedMonths": 2.5,
+    "salaryRange": "$110,000 - $160,000",
+    "demandGrowth": "+28% YoY",
+    "keySkills": [
+      { "name": "Python Foundations", "required": 90, "userProficiency": 90 },
+      { "name": "SQL & Database Design", "required": 85, "userProficiency": 85 },
+      { "name": "Statistics & Probability", "required": 90, "userProficiency": 55 }
+    ]
+  },
+  {
+    "id": "car_da",
+    "title": "Data Analyst",
+    "description": "Analyses structured datasets to generate actionable business reporting and BI dashboards.",
+    "matchScore": 91,
+    "readinessScore": 82,
+    "estimatedMonths": 1.5,
+    "salaryRange": "$70,000 - $110,000",
+    "demandGrowth": "+22% YoY",
+    "keySkills": [
+      { "name": "SQL & Database Design", "required": 90, "userProficiency": 85 },
+      { "name": "Python Foundations", "required": 75, "userProficiency": 90 },
+      { "name": "Data Visualization", "required": 80, "userProficiency": 60 }
+    ]
+  },
+  {
+    "id": "car_mle_ops",
+    "title": "MLOps Engineer",
+    "description": "Bridges the gap between ML research and production deployment using CI/CD, monitoring, and cloud infrastructure.",
+    "matchScore": 72,
+    "readinessScore": 58,
+    "estimatedMonths": 5,
+    "salaryRange": "$130,000 - $180,000",
+    "demandGrowth": "+41% YoY",
+    "keySkills": [
+      { "name": "Python Foundations", "required": 90, "userProficiency": 90 },
+      { "name": "Docker & Kubernetes", "required": 85, "userProficiency": 20 },
+      { "name": "Cloud Platforms (AWS/GCP)", "required": 80, "userProficiency": 25 },
+      { "name": "Model Evaluation & Tuning", "required": 75, "userProficiency": 30 }
+    ]
+  }
+]
