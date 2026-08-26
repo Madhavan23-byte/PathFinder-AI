@@ -50,48 +50,53 @@
 path-finder/
 ├── .gitignore
 ├── README.md
-├── vercel.json                  # Vercel deployment config
-├── package.json                 # Frontend npm dependencies
-├── vite.config.ts               # Vite build config
-├── tailwind.config.js
-├── tsconfig.json
+├── vercel.json              # Vercel deployment config (build + routing rules)
 │
-├── index.html                   # SPA entry point
-├── src/                         # React frontend
-│   ├── App.tsx                  # Router + context providers
-│   ├── main.tsx
-│   ├── types/index.ts           # TypeScript interfaces
-│   ├── context/                 # Auth + App state
-│   ├── services/api.ts          # All backend API calls
-│   ├── components/              # Layout + common components
-│   └── pages/                   # 22 page components
-│
-├── backend/                     # FastAPI backend
-│   ├── main.py                  # Entry point (re-exports app)
-│   ├── requirements.txt
-│   └── app/
-│       ├── main.py              # FastAPI app factory
-│       ├── database.py          # MongoDB connection + collections
-│       ├── core/
-│       │   ├── config.py        # App configuration + env loading
-│       │   └── security.py      # JWT, bcrypt, auth dependency
-│       ├── schemas/
-│       │   └── models.py        # Pydantic request schemas
-│       └── routers/
-│           ├── auth.py          # /api/auth/* endpoints
-│           ├── profile.py       # /api/profile endpoints
-│           ├── dashboard.py     # /api/dashboard endpoint
-│           ├── assessment.py    # /api/assessment/* endpoints
-│           ├── learning.py      # Roadmap, skill gaps, progress, practice
-│           └── misc.py          # Careers, partners, chat, health
-│
-├── api/                         # Vercel serverless function bridge
-│   ├── index.py                 # Imports FastAPI app for Vercel
+├── api/                     # Vercel serverless bridge (must stay at root)
+│   ├── index.py             # Imports FastAPI app for Vercel Python runtime
 │   └── requirements.txt
 │
-└── data/                        # Static data files
-    ├── questions_bank.json      # 12 assessment questions
-    └── career_paths.json        # Career role definitions
+├── frontend/                # ⚛️  React + TypeScript + Vite frontend
+│   ├── index.html           # Vite SPA shell
+│   ├── package.json         # npm dependencies
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── .env.example         # Frontend env template
+│   └── src/
+│       ├── App.tsx           # Router + context providers
+│       ├── main.tsx          # React mount point
+│       ├── index.css         # Global styles
+│       ├── types/index.ts    # All TypeScript interfaces
+│       ├── context/          # AuthContext + AppContext
+│       ├── services/api.ts   # All backend API calls
+│       ├── components/       # Layout + common UI components
+│       └── pages/            # 22 page components
+│
+└── backend/                 # 🐍 FastAPI + MongoDB backend
+    ├── main.py              # Entry point (re-exports app)
+    ├── requirements.txt     # Python dependencies
+    ├── .env.example         # Backend env template
+    ├── data/                # Static JSON data files
+    │   ├── questions_bank.json  # 12 assessment questions
+    │   └── career_paths.json    # Career role definitions
+    └── app/
+        ├── database.py      # MongoDB connection + collections
+        ├── main.py          # FastAPI app factory (registers routers)
+        ├── core/
+        │   ├── config.py    # Settings + env loading
+        │   └── security.py  # JWT, bcrypt, auth dependency
+        ├── schemas/
+        │   └── models.py    # All Pydantic request schemas
+        └── routers/
+            ├── auth.py          # /api/auth/*
+            ├── profile.py       # /api/profile
+            ├── dashboard.py     # /api/dashboard
+            ├── assessment.py    # /api/assessment/*
+            ├── learning.py      # /api/roadmap, skill-gaps, progress, practice
+            └── misc.py          # /api/careers, partners, chat, health
 ```
 
 ---

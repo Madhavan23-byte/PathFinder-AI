@@ -13,7 +13,7 @@ from backend.app.schemas.models import ChatSchema
 router = APIRouter(prefix="/api", tags=["Misc"])
 
 # Load careers from data/ if available
-_CAREERS_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "career_paths.json"
+_CAREERS_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "career_paths.json"
 
 
 def _load_careers():

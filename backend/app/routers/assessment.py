@@ -23,7 +23,7 @@ from backend.app.schemas.models import AssessmentSubmitSchema
 router = APIRouter(prefix="/api/assessment", tags=["Assessment"])
 
 # --- Load question bank from data/ (falls back to inline if file missing) ---
-_DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "questions_bank.json"
+_DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "questions_bank.json"
 
 
 def _load_questions():
