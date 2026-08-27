@@ -16,12 +16,20 @@ import {
 } from '../types';
 
 const getApiBaseUrl = (): string => {
+  // Force relative URLs in production regardless of Vercel environment variables.
+  // This prevents accidental localhost connections on the live site.
+  if (import.meta.env.PROD) {
+    return '';
+  }
+  
   if (import.meta.env.VITE_API_BASE_URL !== undefined && import.meta.env.VITE_API_BASE_URL !== '') {
     return import.meta.env.VITE_API_BASE_URL;
   }
+  
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     return 'http://localhost:8000';
   }
+  
   return '';
 };
 
