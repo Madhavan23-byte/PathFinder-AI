@@ -27,6 +27,8 @@ import { CollaborationPage } from './pages/CollaborationPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { DemoModePage } from './pages/DemoModePage';
+import { ProjectMentorPage } from './pages/ProjectMentorPage';
+
 
 export function App() {
   return (
@@ -202,8 +204,18 @@ export function App() {
                 }
               />
 
+              <Route
+                path="project-mentor"
+                element={
+                  <ProtectedRoute>
+                    <ProjectMentorPage />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Catch-all fallback */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
             </Route>
           </Routes>
         </BrowserRouter>

@@ -13,23 +13,25 @@ import {
   AssessmentQuestion,
   AssessmentResult,
   RootCauseDiagnosis,
+  // New types
+  CareerRecommendationResponse,
+  NextAction,
+  TeachingSession,
+  TeachingEvaluation,
+  NextConceptResponse,
+  Project,
 } from '../types';
 
 const getApiBaseUrl = (): string => {
-  // Force relative URLs in production regardless of Vercel environment variables.
-  // This prevents accidental localhost connections on the live site.
   if (import.meta.env.PROD) {
     return '';
   }
-  
   if (import.meta.env.VITE_API_BASE_URL !== undefined && import.meta.env.VITE_API_BASE_URL !== '') {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     return 'http://localhost:8000';
   }
-  
   return '';
 };
 
@@ -82,7 +84,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const apiService = {
-  // --- AUTHENTICATION API ---
+  // ── AUTHENTICATION ────────────────────────────────────────────────────────
   async signup(data: { name: string; email: string; password: string }): Promise<AuthResponse> {
     return request<AuthResponse>('/api/auth/register', {
       method: 'POST',
@@ -126,7 +128,7 @@ export const apiService = {
     });
   },
 
-  // --- DASHBOARD & PROFILE DATA API ---
+  // ── DASHBOARD & PROFILE ───────────────────────────────────────────────────
   async getDashboard(): Promise<DashboardData> {
     return request<DashboardData>('/api/dashboard');
   },
@@ -158,7 +160,7 @@ export const apiService = {
     });
   },
 
-  // --- ASSESSMENT & PRACTICE API ---
+  // ── ASSESSMENT & PRACTICE ─────────────────────────────────────────────────
   async startAssessment(): Promise<AssessmentQuestion[]> {
     return request<AssessmentQuestion[]>('/api/assessment/start');
   },
@@ -185,7 +187,7 @@ export const apiService = {
     });
   },
 
-  // --- PROGRESS & BADGES API ---
+  // ── PROGRESS & BADGES ─────────────────────────────────────────────────────
   async getProgress(): Promise<ProgressData> {
     return request<ProgressData>('/api/progress');
   },
@@ -194,7 +196,7 @@ export const apiService = {
     return request<Badge[]>('/api/badges');
   },
 
-  // --- USER PROFILE & CAREERS API ---
+  // ── USER PROFILE & CAREERS ────────────────────────────────────────────────
   async getProfile(): Promise<LearnerProfile> {
     return request<LearnerProfile>('/api/profile');
   },
@@ -218,6 +220,100 @@ export const apiService = {
     const res = await request<{ response: string }>('/api/chat', {
       method: 'POST',
       body: JSON.stringify({ message, context }),
+    });
+    return res.response;
+  },
+
+  // ── CAREER DISCOVERY ENGINE ───────────────────────────────────────────────
+
+  async getCareerRecommendations(): Promise<CareerRecommendationResponse> {
+    return request<CareerRecommendationResponse>('/api/career/recommend');
+  },
+
+  async selectCareer(careerId: string, careerTitle: string): Promise<{ success: boolean; selectedCareer: string; message: string }> {
+    return request<{ success: boolean; selectedCareer: string; message: string }>('/api/career/select', {
+      method: 'POST',
+      body: JSON.stringify({ careerId, careerTitle }),
+    });
+  },
+
+  async getCareerDetail(careerId: string): Promise<CareerRole> {
+    return request<CareerRole>(`/api/career/detail/${careerId}`);
+  },
+
+  // ── ADAPTIVE ENGINE ───────────────────────────────────────────────────────
+
+  async getNextAction(): Promise<NextAction> {
+    return request<NextAction>('/api/next-action');
+  },
+
+  async getSkillGraphData(): Promise<{ nodes: any[]; edges: any[] }> {
+    return request<{ nodes: any[]; edges: any[] }>('/api/skill-graph');
+  },
+
+  // ── AI TEACHING ENGINE ────────────────────────────────────────────────────
+
+  async getTeachingSession(skillId: string): Promise<TeachingSession> {
+    return request<TeachingSession>(`/api/teach/topic/${skillId}`);
+  },
+
+  async evaluateAnswer(data: {
+    skillId: string;
+    questionId: string;
+    selectedIndex: number;
+    correctIndex: number;
+  }): Promise<TeachingEvaluation> {
+    return request<TeachingEvaluation>('/api/teach/evaluate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getNextConcept(): Promise<NextConceptResponse> {
+    return request<NextConceptResponse>('/api/teach/next');
+  },
+
+  async completeTeachingSession(data: {
+    skillId: string;
+    score: number;
+    timeSpentMinutes: number;
+  }): Promise<{ success: boolean; skillId: string; mastered: boolean; message: string }> {
+    return request<{ success: boolean; skillId: string; mastered: boolean; message: string }>('/api/teach/session/complete', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // ── PROJECTS ENGINE ───────────────────────────────────────────────────────
+
+  async getProjects(): Promise<Project[]> {
+    return request<Project[]>('/api/projects');
+  },
+
+  async getProjectDetail(projectId: string): Promise<Project> {
+    return request<Project>(`/api/projects/${projectId}`);
+  },
+
+  async completeMilestone(projectId: string, milestoneId: string): Promise<{
+    success: boolean;
+    milestoneId: string;
+    completedCount: number;
+    totalMilestones: number;
+    completionPercentage: number;
+    projectComplete: boolean;
+    message: string;
+    aiMentorTip: string;
+  }> {
+    return request(`/api/projects/${projectId}/milestone`, {
+      method: 'POST',
+      body: JSON.stringify({ milestoneId }),
+    });
+  },
+
+  async sendProjectMentorChat(message: string, projectId: string, milestoneId?: string): Promise<string> {
+    const res = await request<{ response: string }>('/api/projects/mentor/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, projectId, milestoneId }),
     });
     return res.response;
   },

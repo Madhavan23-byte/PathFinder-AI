@@ -16,7 +16,9 @@ import {
   Settings,
   LogOut,
   X,
+  FolderGit2,
 } from 'lucide-react';
+
 import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
@@ -41,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { label: 'Recommendations', path: '/recommendations', icon: Sparkles },
     { label: 'Adaptive Roadmap', path: '/roadmap', icon: Map },
     { label: 'Learn Workspace', path: '/learn', icon: BookOpen },
+    { label: 'Projects & Portfolio', path: '/project-mentor', icon: FolderGit2, badge: 'NEW' },
     { label: 'Diagnostic Practice', path: '/practice', icon: Target },
     { label: 'Progress & Rhythm', path: '/progress', icon: LineChart },
     { label: 'Career Explorer', path: '/career-explorer', icon: Compass },
@@ -49,6 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { label: 'Learner Profile', path: '/profile', icon: User },
     { label: 'App Settings', path: '/settings', icon: Settings },
   ];
+
 
   const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     user?.name || 'PathFinder Learner'

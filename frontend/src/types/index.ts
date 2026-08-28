@@ -15,35 +15,36 @@ export interface AuthResponse {
 }
 
 export interface KnowledgeMetrics {
-  overallMastery: number; // percentage
+  overallMastery: number;
   conceptsMastered: number;
   totalConcepts: number;
   strongSkills: string[];
   weakSkills: string[];
+  masteredConcepts?: string[];
 }
 
 export interface AbilityMetrics {
-  assessmentAccuracy: number; // percentage
+  assessmentAccuracy: number;
   totalAttempts: number;
-  masteryProgression: number; // trend +%
+  masteryProgression: number;
 }
 
 export interface PaceMetrics {
   avgSessionMinutes: number;
-  progressVelocity: 'Optimal' | 'Accelerated' | 'Moderate' | 'Behind';
+  progressVelocity: 'Optimal' | 'Accelerated' | 'Moderate' | 'Behind' | 'New Learner';
   estimatedDaysToMastery: number;
 }
 
 export interface BehaviorMetrics {
   sessionsPerWeek: number;
-  completionRate: number; // percentage
-  consistencyScore: number; // 0-100
+  completionRate: number;
+  consistencyScore: number;
   roadmapDelayDays: number;
 }
 
 export interface PreferenceMetrics {
-  resourceTypes: ('Video' | 'Text' | 'Visual' | 'Hands-on practice' | 'Interactive' | 'Projects' | 'Quizzes')[];
-  explanationFormats: ('Step-by-step' | 'Conceptual' | 'Code-first' | 'Visual Diagram' | 'Analogy')[];
+  resourceTypes: string[];
+  explanationFormats: string[];
 }
 
 export interface AvailabilityMetrics {
@@ -69,8 +70,8 @@ export interface Skill {
   id: string;
   name: string;
   category: string;
-  currentLevel: number; // 0 - 100
-  requiredLevel: number; // 0 - 100
+  currentLevel: number;
+  requiredLevel: number;
   status: SkillStatus;
   prerequisites: string[];
   careerRelevance: 'Low' | 'Medium' | 'High' | 'Critical';
@@ -87,16 +88,49 @@ export interface SkillGap {
   careerRelevance: string;
 }
 
+export interface CareerSkillStatus {
+  name: string;
+  learnerLevel: number;
+  requiredLevel: number;
+  status: 'strong' | 'partial' | 'gap';
+}
+
 export interface CareerRole {
   id: string;
   title: string;
   description: string;
-  matchScore: number; // percentage fit
-  readinessScore: number; // percentage ready
+  matchScore: number;
+  readinessScore: number;
   estimatedMonths: number;
   salaryRange: string;
   demandGrowth: string;
   keySkills: { name: string; required: number; userProficiency: number }[];
+  explanation?: string;
+  skillStatuses?: CareerSkillStatus[];
+  gapCount?: number;
+  strongCount?: number;
+  typicalProjects?: string[];
+  certifications?: string[];
+  topCompanies?: string[];
+}
+
+export interface CareerRecommendationResponse {
+  recommendations: CareerRole[];
+  basedOn: {
+    selfDeclaredSkills: number;
+    assessmentComplete: boolean;
+    targetCareer: string;
+    totalCareersEvaluated: number;
+  };
+}
+
+export interface NextAction {
+  actionType: string;
+  actionLabel: string;
+  targetRoute: string;
+  reason: string;
+  urgency: 'critical' | 'high' | 'medium' | 'low';
+  estimatedMinutes: number;
 }
 
 export interface AssessmentQuestion {
@@ -109,6 +143,7 @@ export interface AssessmentQuestion {
   correctAnswerIndex?: number;
   explanation?: string;
   conceptTag: string;
+  skillId?: string;
 }
 
 export interface AssessmentResult {
@@ -136,11 +171,13 @@ export interface RoadmapItem {
   phase: number;
   phaseTitle: string;
   order: number;
-  status: 'completed' | 'current' | 'locked';
+  status: 'completed' | 'current' | 'locked' | 'remedial';
   estimatedHours: number;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   resourcesCount: number;
   whyPositioned: string;
+  description?: string;
+  prerequisites?: string[];
 }
 
 export interface RecommendationReason {
@@ -222,4 +259,100 @@ export interface NotificationItem {
   timestamp: string;
   read: boolean;
   actionUrl?: string;
+}
+
+// ── Teaching Engine Types ─────────────────────────────────────────────────────
+
+export interface TeachingQuestion {
+  id: string;
+  text: string;
+  options: string[];
+  correctIndex: number;
+  conceptTag: string;
+  correctExplanation: string;
+}
+
+export interface TeachingSession {
+  skillId: string;
+  skillName: string;
+  phase: 'explain' | 'example' | 'question' | 'evaluate' | 'feedback' | 'complete';
+  explanation: string;
+  example: string;
+  question: TeachingQuestion;
+  difficulty: string;
+  estimatedMinutes: number;
+  learningObjectives: string[];
+  keyPoints: string[];
+}
+
+export interface TeachingEvaluation {
+  isCorrect: boolean;
+  score: number;
+  feedbackTitle: string;
+  feedbackBody: string;
+  conceptUnderstanding: boolean;
+  correctIndex: number;
+  correctExplanation: string;
+  recommendedAction: 'continue' | 'practice_more' | 'remedial';
+  nextPhase: string;
+}
+
+export interface NextConceptResponse {
+  skillId: string | null;
+  skillName?: string;
+  difficulty?: string;
+  estimatedMinutes?: number;
+  prerequisites?: string[];
+  teachingRoute?: string;
+  message: string;
+  recommendedAction?: string;
+}
+
+// ── Project Types ─────────────────────────────────────────────────────────────
+
+export interface ProjectMilestone {
+  id: string;
+  title: string;
+  estimatedHours: number;
+  completed: boolean;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  skillStage: string;
+  targetCareers: string[];
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  estimatedHours: number;
+  description: string;
+  objective: string;
+  skillsUsed: string[];
+  milestones: ProjectMilestone[];
+  evaluationCriteria: string[];
+  expectedOutput: string;
+  portfolioValue: string;
+  careerMatch?: boolean;
+  completedMilestones?: number;
+  totalMilestones?: number;
+  completionPercentage?: number;
+  status?: 'available' | 'in_progress' | 'completed';
+  isStarted?: boolean;
+}
+
+// ── Career Readiness Types ────────────────────────────────────────────────────
+
+export interface ReadinessFactor {
+  score: number;
+  weight: number;
+  insight: string;
+}
+
+export interface ReadinessScore {
+  overallScore: number;
+  readinessLabel: string;
+  topImprovement: string;
+  skillMastery: ReadinessFactor & { details: { skill: string; score: number; weight: number; status: string }[] };
+  assessmentPerformance: ReadinessFactor;
+  projectCompletion: ReadinessFactor & { completedMilestones: number; totalMilestones: number };
+  learningConsistency: ReadinessFactor & { streakDays: number; sessionsPerWeek: number };
 }

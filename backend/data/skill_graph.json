@@ -1,0 +1,218 @@
+[
+  {
+    "id": "programming_fundamentals",
+    "name": "Programming Fundamentals",
+    "category": "Foundation",
+    "prerequisites": [],
+    "estimatedHours": 8,
+    "difficulty": "Beginner",
+    "description": "Core programming logic: variables, conditionals, loops, functions, and basic problem decomposition."
+  },
+  {
+    "id": "python_foundations",
+    "name": "Python Foundations",
+    "category": "Foundation",
+    "prerequisites": ["programming_fundamentals"],
+    "estimatedHours": 15,
+    "difficulty": "Beginner",
+    "description": "Python syntax, data types, functions, modules, OOP basics, and the scientific Python ecosystem."
+  },
+  {
+    "id": "data_structures",
+    "name": "Data Structures & Algorithms",
+    "category": "Foundation",
+    "prerequisites": ["python_foundations"],
+    "estimatedHours": 25,
+    "difficulty": "Intermediate",
+    "description": "Arrays, linked lists, trees, graphs, hash maps. Sorting, searching, recursion, time/space complexity."
+  },
+  {
+    "id": "sql_databases",
+    "name": "SQL & Databases",
+    "category": "Data",
+    "prerequisites": ["programming_fundamentals"],
+    "estimatedHours": 12,
+    "difficulty": "Beginner",
+    "description": "Relational database concepts, SQL queries, JOINs, GROUP BY, window functions, database design."
+  },
+  {
+    "id": "mathematics_foundations",
+    "name": "Mathematics Foundations",
+    "category": "Mathematics",
+    "prerequisites": [],
+    "estimatedHours": 10,
+    "difficulty": "Beginner",
+    "description": "Functions, sets, algebra, sequences, mathematical notation and proof fundamentals."
+  },
+  {
+    "id": "statistics_probability",
+    "name": "Statistics & Probability",
+    "category": "Mathematics",
+    "prerequisites": ["mathematics_foundations"],
+    "estimatedHours": 18,
+    "difficulty": "Intermediate",
+    "description": "Descriptive stats, probability theory, distributions, Bayes theorem, hypothesis testing, confidence intervals."
+  },
+  {
+    "id": "linear_algebra",
+    "name": "Linear Algebra",
+    "category": "Mathematics",
+    "prerequisites": ["mathematics_foundations"],
+    "estimatedHours": 18,
+    "difficulty": "Intermediate",
+    "description": "Vectors, matrices, dot products, eigenvalues/eigenvectors, matrix decomposition, and transformations."
+  },
+  {
+    "id": "calculus_optimization",
+    "name": "Calculus & Optimization",
+    "category": "Mathematics",
+    "prerequisites": ["mathematics_foundations", "linear_algebra"],
+    "estimatedHours": 15,
+    "difficulty": "Intermediate",
+    "description": "Derivatives, partial derivatives, chain rule, gradient descent, convex optimization."
+  },
+  {
+    "id": "machine_learning",
+    "name": "Machine Learning Fundamentals",
+    "category": "Machine Learning",
+    "prerequisites": ["python_foundations", "statistics_probability", "linear_algebra"],
+    "estimatedHours": 35,
+    "difficulty": "Intermediate",
+    "description": "Supervised/unsupervised learning, regression, classification, clustering, feature engineering, cross-validation."
+  },
+  {
+    "id": "model_evaluation",
+    "name": "Model Evaluation & Tuning",
+    "category": "Machine Learning",
+    "prerequisites": ["machine_learning", "statistics_probability"],
+    "estimatedHours": 15,
+    "difficulty": "Intermediate",
+    "description": "Metrics (accuracy, precision, recall, F1, AUC-ROC), hyperparameter tuning, bias-variance tradeoff, regularization."
+  },
+  {
+    "id": "deep_learning",
+    "name": "Deep Learning",
+    "category": "AI",
+    "prerequisites": ["machine_learning", "linear_algebra", "calculus_optimization"],
+    "estimatedHours": 40,
+    "difficulty": "Advanced",
+    "description": "Neural network architectures, backpropagation, CNNs, RNNs, LSTM, attention, Transformers."
+  },
+  {
+    "id": "nlp",
+    "name": "Natural Language Processing",
+    "category": "AI",
+    "prerequisites": ["deep_learning", "statistics_probability"],
+    "estimatedHours": 30,
+    "difficulty": "Advanced",
+    "description": "Text preprocessing, word embeddings, language models, BERT/GPT architectures, RAG, fine-tuning."
+  },
+  {
+    "id": "computer_vision",
+    "name": "Computer Vision",
+    "category": "AI",
+    "prerequisites": ["deep_learning", "linear_algebra"],
+    "estimatedHours": 30,
+    "difficulty": "Advanced",
+    "description": "Image processing, CNN architectures, object detection (YOLO, R-CNN), image segmentation, transfer learning."
+  },
+  {
+    "id": "mlops",
+    "name": "MLOps & Deployment",
+    "category": "Engineering",
+    "prerequisites": ["machine_learning", "data_structures"],
+    "estimatedHours": 25,
+    "difficulty": "Advanced",
+    "description": "Model serving (FastAPI, TorchServe), Docker, CI/CD pipelines, model monitoring, feature stores."
+  },
+  {
+    "id": "data_engineering",
+    "name": "Data Engineering",
+    "category": "Data",
+    "prerequisites": ["sql_databases", "python_foundations"],
+    "estimatedHours": 25,
+    "difficulty": "Intermediate",
+    "description": "ETL pipelines, data warehousing, Apache Spark, Airflow, dbt, streaming data."
+  },
+  {
+    "id": "data_visualization",
+    "name": "Data Visualization",
+    "category": "Data",
+    "prerequisites": ["python_foundations", "statistics_probability"],
+    "estimatedHours": 10,
+    "difficulty": "Beginner",
+    "description": "Matplotlib, Seaborn, Plotly, dashboard design, storytelling with data, BI tools."
+  },
+  {
+    "id": "cloud_platforms",
+    "name": "Cloud Platforms (AWS/GCP/Azure)",
+    "category": "Infrastructure",
+    "prerequisites": ["programming_fundamentals"],
+    "estimatedHours": 25,
+    "difficulty": "Intermediate",
+    "description": "Cloud services (EC2, S3, Lambda), managed ML services (SageMaker, Vertex AI), IAM, networking."
+  },
+  {
+    "id": "docker_kubernetes",
+    "name": "Docker & Kubernetes",
+    "category": "Infrastructure",
+    "prerequisites": ["programming_fundamentals"],
+    "estimatedHours": 18,
+    "difficulty": "Intermediate",
+    "description": "Containerisation with Docker, orchestration with Kubernetes, Helm charts, service meshes."
+  },
+  {
+    "id": "networking_basics",
+    "name": "Networking Basics",
+    "category": "Infrastructure",
+    "prerequisites": [],
+    "estimatedHours": 12,
+    "difficulty": "Beginner",
+    "description": "TCP/IP model, DNS, HTTP/HTTPS, firewalls, VPNs, subnets, and network architecture."
+  },
+  {
+    "id": "cybersecurity_fundamentals",
+    "name": "Cybersecurity Fundamentals",
+    "category": "Security",
+    "prerequisites": ["networking_basics", "programming_fundamentals"],
+    "estimatedHours": 25,
+    "difficulty": "Intermediate",
+    "description": "CIA triad, attack vectors (OWASP Top 10), cryptography, penetration testing basics, SIEM."
+  },
+  {
+    "id": "web_development",
+    "name": "Web Development Fundamentals",
+    "category": "Software",
+    "prerequisites": ["programming_fundamentals"],
+    "estimatedHours": 22,
+    "difficulty": "Beginner",
+    "description": "HTML5, CSS3, JavaScript ES6+, REST APIs, JSON, browser DevTools."
+  },
+  {
+    "id": "software_engineering",
+    "name": "Software Engineering Principles",
+    "category": "Software",
+    "prerequisites": ["data_structures", "python_foundations"],
+    "estimatedHours": 22,
+    "difficulty": "Intermediate",
+    "description": "SOLID principles, design patterns, TDD, code review, system design, API design, clean architecture."
+  },
+  {
+    "id": "react_frontend",
+    "name": "React & Frontend Development",
+    "category": "Software",
+    "prerequisites": ["web_development"],
+    "estimatedHours": 30,
+    "difficulty": "Intermediate",
+    "description": "React 18, hooks, state management, TypeScript, Vite, component design, and frontend testing."
+  },
+  {
+    "id": "ui_ux_design",
+    "name": "UI/UX Design Principles",
+    "category": "Design",
+    "prerequisites": [],
+    "estimatedHours": 18,
+    "difficulty": "Beginner",
+    "description": "User research methods, wireframing, prototyping in Figma, usability testing, design systems, accessibility."
+  }
+]

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.core.config import APP_TITLE, APP_DESCRIPTION, APP_VERSION
 from backend.app.routers import auth, profile, dashboard, assessment, learning, misc
+from backend.app.routers import career, teaching, projects
 
 app = FastAPI(
     title=APP_TITLE,
@@ -30,3 +31,9 @@ app.include_router(dashboard.router)
 app.include_router(assessment.router)
 app.include_router(learning.router)
 app.include_router(misc.router)
+
+# PathFinder AI Intelligence Routers
+app.include_router(career.router)     # /api/career/*
+app.include_router(teaching.router)   # /api/teach/*
+app.include_router(projects.router)   # /api/projects/*
+
