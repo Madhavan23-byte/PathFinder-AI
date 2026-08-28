@@ -52,7 +52,7 @@ def get_topic_content(skill_id: str, learner_level: str = "beginner") -> Dict:
 
     # If no level-specific explanation, use LLM to generate one
     if not explanation:
-        from backend.app.core.llm import get_llm_provider
+        from app.core.llm import get_llm_provider
         prompt = f"Explain {topic.get('name', skill_id)} for a {learner_level} learner in 3 short paragraphs with a practical example."
         explanation = get_llm_provider().generate(prompt)
 
@@ -98,7 +98,7 @@ def evaluate_answer(
     correct_explanation = question.get("correctExplanation", "")
 
     if is_correct:
-        from backend.app.core.llm import get_llm_provider
+        from app.core.llm import get_llm_provider
         feedback_prompt = (
             f"The learner correctly answered a question about {skill_id.replace('_', ' ')}. "
             f"Give 2-sentence positive reinforcement and mention they're ready for the next concept."
@@ -106,7 +106,7 @@ def evaluate_answer(
         feedback_body = get_llm_provider().generate(f"correct feedback for {skill_id}")
         recommended_action = "continue"
     else:
-        from backend.app.core.llm import get_llm_provider
+        from app.core.llm import get_llm_provider
         feedback_body = get_llm_provider().generate(f"incorrect feedback explain {skill_id} simply")
         recommended_action = "practice_more"
 
@@ -135,7 +135,7 @@ def get_next_concept(
     Returns the ID of the next concept to teach after the current one is mastered.
     Uses the skill graph to respect prerequisites.
     """
-    from backend.app.core.skill_graph import get_skill_graph
+    from app.core.skill_graph import get_skill_graph
     graph = get_skill_graph()
 
     ordered = graph.topological_sort(target_career_skills)

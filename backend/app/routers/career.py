@@ -8,13 +8,13 @@ Career Discovery Engine. All scoring is transparent and explainable.
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, Dict, Any
 
-from backend.app.database import (
+from app.database import (
     profiles_collection,
     learner_models_collection,
     users_collection,
 )
-from backend.app.core.security import get_current_user_id, sanitize_doc
-from backend.app.core.career_engine import recommend_careers, get_career_by_id
+from app.core.security import get_current_user_id, sanitize_doc
+from app.core.career_engine import recommend_careers, get_career_by_id
 
 router = APIRouter(prefix="/api/career", tags=["Career"])
 
@@ -126,8 +126,8 @@ def get_career_detail(career_id: str, user_id: str = Depends(get_current_user_id
 
 def _regenerate_roadmap(user_id: str, career_title: str):
     """Regenerate the learner's roadmap using the skill graph engine."""
-    from backend.app.database import roadmaps_collection, skill_gaps_collection, learner_models_collection
-    from backend.app.core.skill_graph import generate_learning_path
+    from app.database import roadmaps_collection, skill_gaps_collection, learner_models_collection
+    from app.core.skill_graph import generate_learning_path
 
     model = learner_models_collection.find_one({"user_id": user_id})
     skill_scores = {}

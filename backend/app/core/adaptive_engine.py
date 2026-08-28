@@ -170,7 +170,7 @@ def should_reroute_to_remedial(skill_scores: Dict[str, float], current_skill_id:
 
     Returns (should_reroute, list_of_weak_prerequisite_skills).
     """
-    from backend.app.core.skill_graph import get_skill_graph
+    from app.core.skill_graph import get_skill_graph
     graph = get_skill_graph()
     skill = graph.get_skill(current_skill_id)
     if not skill:

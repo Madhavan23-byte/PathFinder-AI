@@ -12,9 +12,9 @@ import time
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, Dict, Any
 
-from backend.app.core.security import get_current_user_id
-from backend.app.core.teaching_engine import get_topic_content, evaluate_answer, get_next_concept
-from backend.app.database import learner_models_collection, progress_collection, roadmaps_collection
+from app.core.security import get_current_user_id
+from app.core.teaching_engine import get_topic_content, evaluate_answer, get_next_concept
+from app.database import learner_models_collection, progress_collection, roadmaps_collection
 
 router = APIRouter(prefix="/api/teach", tags=["Teaching"])
 
@@ -92,7 +92,7 @@ def get_next_learning_concept(user_id: str = Depends(get_current_user_id)):
     Uses the skill graph to respect prerequisites and the adaptive engine
     to determine if remedial content is needed first.
     """
-    from backend.app.database import profiles_collection
+    from app.database import profiles_collection
 
     profile = profiles_collection.find_one({"user_id": user_id})
     model = learner_models_collection.find_one({"user_id": user_id})
@@ -107,8 +107,8 @@ def get_next_learning_concept(user_id: str = Depends(get_current_user_id)):
         mastered += [s.lower().replace(" ", "_") for s in strong]
 
     # Get career skill requirements
-    from backend.app.core.career_engine import get_career_skill_requirements
-    from backend.app.core.skill_graph import get_skill_graph
+    from app.core.career_engine import get_career_skill_requirements
+    from app.core.skill_graph import get_skill_graph
 
     career_skills = get_career_skill_requirements(target_career)
     target_ids = [

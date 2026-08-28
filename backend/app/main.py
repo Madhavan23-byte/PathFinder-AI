@@ -5,9 +5,9 @@ Assembles all routers and middleware into the final application instance.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.core.config import APP_TITLE, APP_DESCRIPTION, APP_VERSION
-from backend.app.routers import auth, profile, dashboard, assessment, learning, misc
-from backend.app.routers import career, teaching, projects
+from app.core.config import APP_TITLE, APP_DESCRIPTION, APP_VERSION
+from app.routers import auth, profile, dashboard, assessment, learning, misc
+from app.routers import career, teaching, projects
 
 app = FastAPI(
     title=APP_TITLE,

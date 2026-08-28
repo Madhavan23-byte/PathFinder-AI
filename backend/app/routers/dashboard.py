@@ -4,7 +4,7 @@ Aggregates data from multiple collections to power the main dashboard.
 """
 from fastapi import APIRouter, Depends
 
-from backend.app.database import (
+from app.database import (
     profiles_collection,
     learner_models_collection,
     progress_collection,
@@ -12,7 +12,7 @@ from backend.app.database import (
     roadmaps_collection,
     skill_gaps_collection,
 )
-from backend.app.core.security import get_current_user_id, sanitize_doc
+from app.core.security import get_current_user_id, sanitize_doc
 
 router = APIRouter(prefix="/api", tags=["Dashboard"])
 

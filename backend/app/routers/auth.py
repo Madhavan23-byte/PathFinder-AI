@@ -5,19 +5,19 @@ Handles user registration, login, logout, and password reset.
 import time
 from fastapi import APIRouter, HTTPException, Depends
 
-from backend.app.database import (
+from app.database import (
     users_collection,
     profiles_collection,
     learner_models_collection,
     progress_collection,
 )
-from backend.app.core.security import (
+from app.core.security import (
     hash_password,
     verify_password,
     create_jwt_token,
     get_current_user_id,
 )
-from backend.app.schemas.models import (
+from app.schemas.models import (
     RegisterSchema,
     LoginSchema,
     ForgotPasswordSchema,

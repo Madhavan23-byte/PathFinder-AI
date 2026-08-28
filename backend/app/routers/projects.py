@@ -16,8 +16,8 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any, List
 
-from backend.app.core.security import get_current_user_id
-from backend.app.database import (
+from app.core.security import get_current_user_id
+from app.database import (
     profiles_collection,
     progress_collection,
     learner_models_collection,
@@ -195,7 +195,7 @@ def project_mentor_chat(
     user_id: str = Depends(get_current_user_id),
 ):
     """AI Project Mentor responds to student questions about their project."""
-    from backend.app.core.llm import get_llm_provider
+    from app.core.llm import get_llm_provider
 
     message = data.get("message", "")
     project_id = data.get("projectId", "")

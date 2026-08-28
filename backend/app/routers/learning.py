@@ -6,23 +6,23 @@ import time
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, Depends
 
-from backend.app.database import (
+from app.database import (
     skill_gaps_collection,
     recommendations_collection,
     roadmaps_collection,
     progress_collection,
     badges_collection,
 )
-from backend.app.core.security import get_current_user_id, sanitize_doc
-from backend.app.schemas.models import PracticeSubmitSchema
+from app.core.security import get_current_user_id, sanitize_doc
+from app.schemas.models import PracticeSubmitSchema
 
 router = APIRouter(prefix="/api", tags=["Learning"])
 
 
 @router.get("/learner-model")
 def get_learner_model(user_id: str = Depends(get_current_user_id)):
-    from backend.app.database import learner_models_collection
-    from backend.app.database import users_collection
+    from app.database import learner_models_collection
+    from app.database import users_collection
     user_doc = users_collection.find_one({"id": user_id})
     user_info = {
         "id": user_doc["id"], "name": user_doc["name"], "email": user_doc["email"],

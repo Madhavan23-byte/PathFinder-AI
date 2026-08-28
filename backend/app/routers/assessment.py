@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from fastapi import APIRouter, Depends
 
-from backend.app.database import (
+from app.database import (
     learner_models_collection,
     assessments_collection,
     assessment_attempts_collection,
@@ -17,8 +17,8 @@ from backend.app.database import (
     progress_collection,
     badges_collection,
 )
-from backend.app.core.security import get_current_user_id
-from backend.app.schemas.models import AssessmentSubmitSchema
+from app.core.security import get_current_user_id
+from app.schemas.models import AssessmentSubmitSchema
 
 router = APIRouter(prefix="/api/assessment", tags=["Assessment"])
 
@@ -127,8 +127,8 @@ def submit_assessment(data: AssessmentSubmitSchema, user_id: str = Depends(get_c
         },
     ])
     # 4. Populate recommendations dynamically
-    from backend.app.core.recommendation import recommend_resources
-    from backend.app.core.llm import generate_why_reason, generate_roadmap
+    from app.core.recommendation import recommend_resources
+    from app.core.llm import generate_why_reason, generate_roadmap
     
     recommendations_collection.delete_many({"user_id": user_id})
     target_gaps = ["Model Evaluation & Tuning", "Machine Learning Fundamentals"] if score < 75 else ["Advanced MLOps", "Deep Learning"]

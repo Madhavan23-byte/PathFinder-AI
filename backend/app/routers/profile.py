@@ -4,10 +4,10 @@ Handles learner profile retrieval and updates.
 """
 from fastapi import APIRouter, Depends
 
-from backend.app.database import users_collection, profiles_collection
-from backend.app.core.security import get_current_user_id, sanitize_doc
-from backend.app.schemas.models import ProfileUpdateSchema
-from backend.app.routers.auth import get_me
+from app.database import users_collection, profiles_collection
+from app.core.security import get_current_user_id, sanitize_doc
+from app.schemas.models import ProfileUpdateSchema
+from app.routers.auth import get_me
 
 router = APIRouter(prefix="/api", tags=["Profile"])
 

@@ -8,7 +8,7 @@ import jwt
 from typing import Dict, Any, Optional
 from fastapi import HTTPException, Header, status
 
-from backend.app.core.config import JWT_SECRET, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.core.config import JWT_SECRET, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 def hash_password(password: str) -> str:

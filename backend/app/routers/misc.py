@@ -6,9 +6,9 @@ import json
 from pathlib import Path
 from fastapi import APIRouter, Depends
 
-from backend.app.database import client
-from backend.app.core.security import get_current_user_id
-from backend.app.schemas.models import ChatSchema
+from app.database import client
+from app.core.security import get_current_user_id
+from app.schemas.models import ChatSchema
 
 router = APIRouter(prefix="/api", tags=["Misc"])
 
@@ -83,8 +83,8 @@ def get_partners():
 
 @router.get("/learning-sessions")
 def get_learning_sessions(user_id: str = Depends(get_current_user_id)):
-    from backend.app.database import learning_sessions_collection
-    from backend.app.core.security import sanitize_doc
+    from app.database import learning_sessions_collection
+    from app.core.security import sanitize_doc
     items = list(learning_sessions_collection.find({"user_id": user_id}))
     return [sanitize_doc(item) for item in items]
 
@@ -95,8 +95,8 @@ def ai_chat(data: ChatSchema, user_id: str = Depends(get_current_user_id)):
     AI chat assistant. Uses the LLMProvider abstraction (MockProvider by default,
     GeminiProvider if GEMINI_API_KEY and LLM_PROVIDER=gemini are set).
     """
-    from backend.app.core.llm import get_llm_provider
-    from backend.app.database import learner_models_collection, profiles_collection
+    from app.core.llm import get_llm_provider
+    from app.database import learner_models_collection, profiles_collection
 
     # Build learner context for personalised responses
     model = learner_models_collection.find_one({"user_id": user_id})
@@ -117,8 +117,8 @@ def get_next_action(user_id: str = Depends(get_current_user_id)):
     Adaptive Engine determines the single most important next action for this learner.
     This is the core 'What should I do next?' feature of PathFinder.
     """
-    from backend.app.core.adaptive_engine import determine_next_action
-    from backend.app.database import (
+    from app.core.adaptive_engine import determine_next_action
+    from app.database import (
         learner_models_collection, profiles_collection, progress_collection, roadmaps_collection
     )
 
@@ -161,7 +161,7 @@ def get_next_action(user_id: str = Depends(get_current_user_id)):
 @router.get("/skill-graph")
 def get_skill_graph_data(user_id: str = Depends(get_current_user_id)):
     """Returns the skill graph data for visualization on the frontend."""
-    from backend.app.core.skill_graph import get_skill_graph
+    from app.core.skill_graph import get_skill_graph
     graph = get_skill_graph()
     nodes = []
     edges = []

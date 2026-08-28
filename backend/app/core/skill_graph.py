@@ -185,7 +185,7 @@ def generate_learning_path(
         skill_scores: {skill_id: score_0_to_100}
         mastery_threshold: Skills above this score are considered mastered.
     """
-    from backend.app.core.career_engine import get_career_skill_requirements
+    from app.core.career_engine import get_career_skill_requirements
 
     career_skills = get_career_skill_requirements(target_career_title)
     target_ids = []
