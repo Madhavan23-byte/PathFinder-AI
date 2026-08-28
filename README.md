@@ -50,11 +50,6 @@
 path-finder/
 ├── .gitignore
 ├── README.md
-├── vercel.json              # Vercel deployment config (build + routing rules)
-│
-├── api/                     # Vercel serverless bridge (must stay at root)
-│   ├── index.py             # Imports FastAPI app for Vercel Python runtime
-│   └── requirements.txt
 │
 ├── frontend/                # ⚛️  React + TypeScript + Vite frontend
 │   ├── index.html           # Vite SPA shell
@@ -143,7 +138,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 
 **Terminal 1 — Backend:**
 ```bash
-uvicorn backend.main:app --reload --port 8000
+uvicorn backend.app.main:app --reload --port 8000
 ```
 
 **Terminal 2 — Frontend:**
@@ -155,24 +150,23 @@ Open **http://localhost:5173** in your browser.
 
 ---
 
-## ☁️ Vercel Deployment
+## ☁️ Deployment
 
-The project is configured for one-click Vercel deployment.
+This project uses a cleanly separated architecture. You will deploy the **Frontend** and **Backend** as two separate services.
 
-1. Push to GitHub
-2. Import the repo in [Vercel](https://vercel.com)
-3. Set the following **Environment Variables** in Vercel dashboard:
+### 1. Deploying the Backend (Render / Railway / Heroku)
+1. Push your code to GitHub.
+2. Create a new Web Service on your host (e.g., Render).
+3. Set the Root Directory to `backend`.
+4. Set the Build Command to `pip install -r requirements.txt`.
+5. Set the Start Command to `uvicorn app.main:app --host 0.0.0.0 --port 10000`.
+6. Add your Environment Variables (MongoDB URI, JWT Secret, etc).
 
-| Variable | Value |
-|---|---|
-| `MONGODB_URI` | Your MongoDB Atlas connection string |
-| `DATABASE_NAME` | `pathfinder` |
-| `JWT_SECRET` | Your secure secret key |
-| `JWT_ALGORITHM` | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` |
-| `VITE_API_BASE_URL` | *(leave empty — uses relative URLs in production)* |
-
-4. Deploy — Vercel auto-detects Vite for the frontend and serves Python via serverless functions.
+### 2. Deploying the Frontend (Vercel / Netlify)
+1. Import your GitHub repository in Vercel.
+2. Set the **Root Directory** to `frontend`.
+3. Add the `VITE_API_BASE_URL` environment variable, pointing to your deployed Backend URL (e.g., `https://your-backend-app.onrender.com`).
+4. Click Deploy. Vercel will automatically detect Vite and build the React app.
 
 ---
 
