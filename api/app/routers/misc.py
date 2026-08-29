@@ -1,0 +1,187 @@
+"""
+PathFinder Backend — Misc Router
+Handles careers, study partners, AI chat, health check, next-action, and skill graph.
+"""
+import json
+from pathlib import Path
+from fastapi import APIRouter, Depends
+
+from app.database import client
+from app.core.security import get_current_user_id
+from app.schemas.models import ChatSchema
+
+router = APIRouter(prefix="/api", tags=["Misc"])
+
+# Load careers from data/ if available
+_CAREERS_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "career_paths.json"
+
+
+def _load_careers():
+    if _CAREERS_PATH.exists():
+        with open(_CAREERS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return [
+        {
+            "id": "car_mle", "title": "Machine Learning Engineer",
+            "description": "Designs, builds, and deploys production machine learning pipelines and deep learning systems.",
+            "matchScore": 84, "readinessScore": 74, "estimatedMonths": 3,
+            "salaryRange": "$120,000 - $175,000", "demandGrowth": "+34% YoY",
+            "keySkills": [
+                {"name": "Python Foundations", "required": 85, "userProficiency": 90},
+                {"name": "SQL & Database Design", "required": 75, "userProficiency": 85},
+                {"name": "Statistics & Probability", "required": 80, "userProficiency": 55},
+                {"name": "Model Evaluation & Tuning", "required": 80, "userProficiency": 30},
+            ],
+        },
+        {
+            "id": "car_ds", "title": "Data Scientist",
+            "description": "Extracts strategic business insights using statistical analysis, predictive modeling, and data story-telling.",
+            "matchScore": 88, "readinessScore": 76, "estimatedMonths": 2.5,
+            "salaryRange": "$110,000 - $160,000", "demandGrowth": "+28% YoY",
+            "keySkills": [
+                {"name": "Python Foundations", "required": 90, "userProficiency": 90},
+                {"name": "SQL & Database Design", "required": 85, "userProficiency": 85},
+                {"name": "Statistics & Probability", "required": 90, "userProficiency": 55},
+            ],
+        },
+    ]
+
+
+@router.get("/health")
+def health_check():
+    try:
+        client.admin.command("ping")
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": "disconnected", "detail": str(e)}
+
+
+@router.get("/careers")
+def get_careers():
+    return _load_careers()
+
+
+@router.get("/partners")
+def get_partners():
+    from app.database import db
+    from app.core.security import sanitize_doc
+    study_partners_collection = db["study_partners"]
+
+    if study_partners_collection.count_documents({}) == 0:
+        default_partners = [
+            {
+                "id": "prt_01", "name": "Aravind Swamy", "role": "Aspiring AI Researcher",
+                "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+                "matchPercentage": 94, "targetCareer": "Machine Learning Engineer",
+                "currentFocus": "Deep Learning & Neural Networks",
+                "complementarySkills": ["Deep Learning", "PyTorch", "Mathematics"],
+            },
+            {
+                "id": "prt_02", "name": "Sophia Chen", "role": "Data Science Graduate",
+                "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+                "matchPercentage": 89, "targetCareer": "Data Scientist",
+                "currentFocus": "Model Evaluation & Statistics",
+                "complementarySkills": ["Statistics & P-Values", "Data Storytelling", "Python"],
+            }
+        ]
+        study_partners_collection.insert_many(default_partners)
+
+    items = list(study_partners_collection.find({}))
+    return [sanitize_doc(item) for item in items]
+
+
+@router.get("/learning-sessions")
+def get_learning_sessions(user_id: str = Depends(get_current_user_id)):
+    from app.database import learning_sessions_collection
+    from app.core.security import sanitize_doc
+    items = list(learning_sessions_collection.find({"user_id": user_id}))
+    return [sanitize_doc(item) for item in items]
+
+
+@router.post("/chat")
+def ai_chat(data: ChatSchema, user_id: str = Depends(get_current_user_id)):
+    """
+    AI chat assistant. Uses the LLMProvider abstraction (MockProvider by default,
+    GeminiProvider if GEMINI_API_KEY and LLM_PROVIDER=gemini are set).
+    """
+    from app.core.llm import get_llm_provider
+    from app.database import learner_models_collection, profiles_collection
+
+    # Build learner context for personalised responses
+    model = learner_models_collection.find_one({"user_id": user_id})
+    profile = profiles_collection.find_one({"user_id": user_id})
+    context = data.context or {}
+    if model:
+        context["targetCareer"] = (profile or {}).get("targetCareer", "Machine Learning Engineer")
+        context["weakSkills"] = model.get("knowledge", {}).get("weakSkills", [])
+        context["strongSkills"] = model.get("knowledge", {}).get("strongSkills", [])
+
+    resp = get_llm_provider().generate(data.message, context)
+    return {"response": resp}
+
+
+@router.get("/next-action")
+def get_next_action(user_id: str = Depends(get_current_user_id)):
+    """
+    Adaptive Engine determines the single most important next action for this learner.
+    This is the core 'What should I do next?' feature of PathFinder.
+    """
+    from app.core.adaptive_engine import determine_next_action
+    from app.database import (
+        learner_models_collection, profiles_collection, progress_collection, roadmaps_collection
+    )
+
+    model = learner_models_collection.find_one({"user_id": user_id}) or {}
+    profile = profiles_collection.find_one({"user_id": user_id}) or {}
+    progress = progress_collection.find_one({"user_id": user_id}) or {}
+    roadmaps = list(roadmaps_collection.find({"user_id": user_id}))
+
+    assessment_done = model.get("ability", {}).get("totalAttempts", 0) > 0
+    skill_scores = {}
+    weak_skills = model.get("knowledge", {}).get("weakSkills", [])
+    strong_skills = model.get("knowledge", {}).get("strongSkills", [])
+    overall_mastery = model.get("knowledge", {}).get("overallMastery", 0)
+
+    for sk in strong_skills:
+        skill_scores[sk.lower().replace(" ", "_")] = min(overall_mastery + 10, 100)
+    for sk in weak_skills:
+        skill_scores[sk.lower().replace(" ", "_")] = max(overall_mastery - 25, 10)
+
+    current_roadmap_item = next(
+        (r for r in roadmaps if r.get("status") == "current"), None
+    )
+
+    learner_state = {
+        "onboarding_completed": bool(profile),
+        "assessment_completed": assessment_done,
+        "skill_scores": skill_scores,
+        "weak_skills": [sk.lower().replace(" ", "_") for sk in weak_skills],
+        "roadmap_current_module": current_roadmap_item.get("title") if current_roadmap_item else "",
+        "practice_due": assessment_done and progress.get("learningHours", 0) % 2 < 0.5,
+        "projects_available": [],
+        "career_readiness": progress.get("careerReadiness", 0),
+        "streak_days": progress.get("streakDays", 0),
+    }
+
+    action = determine_next_action(learner_state)
+    return action
+
+
+@router.get("/skill-graph")
+def get_skill_graph_data(user_id: str = Depends(get_current_user_id)):
+    """Returns the skill graph data for visualization on the frontend."""
+    from app.core.skill_graph import get_skill_graph
+    graph = get_skill_graph()
+    nodes = []
+    edges = []
+    for skill_id, skill in graph.skills.items():
+        nodes.append({
+            "id": skill_id,
+            "name": skill.get("name", skill_id),
+            "category": skill.get("category", "General"),
+            "difficulty": skill.get("difficulty", "Intermediate"),
+            "estimatedHours": skill.get("estimatedHours", 10),
+        })
+        for prereq in graph.get_prerequisites(skill_id):
+            edges.append({"from": prereq, "to": skill_id})
+    return {"nodes": nodes, "edges": edges}

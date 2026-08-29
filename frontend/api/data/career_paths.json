@@ -1,0 +1,250 @@
+[
+  {
+    "id": "car_ai_engineer",
+    "title": "AI Engineer",
+    "description": "Designs, builds, and deploys production AI systems including LLM-powered applications, inference pipelines, and intelligent agents.",
+    "icon": "brain",
+    "matchScore": 84,
+    "readinessScore": 68,
+    "estimatedMonths": 4,
+    "salaryRange": "$130,000 - $190,000",
+    "demandGrowth": "+52% YoY",
+    "topCompanies": ["OpenAI", "Anthropic", "Google DeepMind", "Microsoft AI"],
+    "typicalProjects": ["LLM-powered Chatbot", "AI Document Processor", "RAG-based Knowledge Base"],
+    "certifications": ["AWS Machine Learning Specialty", "Google Professional ML Engineer"],
+    "requiredSkills": [
+      {"name": "Python Foundations", "importance": 95},
+      {"name": "Machine Learning Fundamentals", "importance": 90},
+      {"name": "Deep Learning", "importance": 85},
+      {"name": "Linear Algebra", "importance": 80},
+      {"name": "Statistics & Probability", "importance": 75},
+      {"name": "Natural Language Processing", "importance": 85},
+      {"name": "MLOps & Deployment", "importance": 70}
+    ],
+    "recommendedSequence": ["python_foundations", "linear_algebra", "statistics_probability", "machine_learning", "deep_learning", "nlp", "mlops"],
+    "learningPhases": [
+      {"phase": 1, "title": "Programming Foundation", "skills": ["python_foundations", "data_structures"]},
+      {"phase": 2, "title": "Mathematical Backbone", "skills": ["linear_algebra", "statistics_probability", "calculus_optimization"]},
+      {"phase": 3, "title": "Core AI/ML", "skills": ["machine_learning", "model_evaluation"]},
+      {"phase": 4, "title": "Deep Learning & NLP", "skills": ["deep_learning", "nlp"]},
+      {"phase": 5, "title": "Production & Deployment", "skills": ["mlops", "cloud_platforms"]}
+    ]
+  },
+  {
+    "id": "car_mle",
+    "title": "Machine Learning Engineer",
+    "description": "Designs, builds, and deploys production machine learning pipelines and deep learning systems at scale.",
+    "icon": "cpu",
+    "matchScore": 82,
+    "readinessScore": 72,
+    "estimatedMonths": 4,
+    "salaryRange": "$120,000 - $175,000",
+    "demandGrowth": "+34% YoY",
+    "topCompanies": ["Netflix", "Uber", "Spotify", "Amazon"],
+    "typicalProjects": ["Recommendation System", "Fraud Detection Model", "Demand Forecasting"],
+    "certifications": ["AWS Machine Learning Specialty", "TensorFlow Developer Certificate"],
+    "requiredSkills": [
+      {"name": "Python Foundations", "importance": 90},
+      {"name": "Machine Learning Fundamentals", "importance": 90},
+      {"name": "Statistics & Probability", "importance": 85},
+      {"name": "Linear Algebra", "importance": 80},
+      {"name": "Model Evaluation & Tuning", "importance": 85},
+      {"name": "Deep Learning", "importance": 75},
+      {"name": "SQL & Databases", "importance": 70},
+      {"name": "MLOps & Deployment", "importance": 75}
+    ],
+    "recommendedSequence": ["python_foundations", "statistics_probability", "linear_algebra", "machine_learning", "model_evaluation", "deep_learning", "mlops"],
+    "learningPhases": [
+      {"phase": 1, "title": "Foundation", "skills": ["python_foundations", "sql_databases"]},
+      {"phase": 2, "title": "Mathematics", "skills": ["statistics_probability", "linear_algebra"]},
+      {"phase": 3, "title": "Machine Learning", "skills": ["machine_learning", "model_evaluation"]},
+      {"phase": 4, "title": "Advanced ML", "skills": ["deep_learning"]},
+      {"phase": 5, "title": "MLOps", "skills": ["mlops", "cloud_platforms"]}
+    ]
+  },
+  {
+    "id": "car_ds",
+    "title": "Data Scientist",
+    "description": "Extracts strategic business insights using statistical analysis, predictive modeling, and data storytelling.",
+    "icon": "bar-chart",
+    "matchScore": 88,
+    "readinessScore": 76,
+    "estimatedMonths": 3,
+    "salaryRange": "$110,000 - $160,000",
+    "demandGrowth": "+28% YoY",
+    "topCompanies": ["Airbnb", "LinkedIn", "Twitter", "Meta"],
+    "typicalProjects": ["Customer Churn Predictor", "A/B Testing Analysis", "Sales Forecasting"],
+    "certifications": ["Google Data Analytics Certificate", "IBM Data Science Certificate"],
+    "requiredSkills": [
+      {"name": "Python Foundations", "importance": 90},
+      {"name": "Statistics & Probability", "importance": 95},
+      {"name": "SQL & Databases", "importance": 85},
+      {"name": "Data Visualization", "importance": 80},
+      {"name": "Machine Learning Fundamentals", "importance": 80},
+      {"name": "Model Evaluation & Tuning", "importance": 75}
+    ],
+    "recommendedSequence": ["python_foundations", "sql_databases", "statistics_probability", "data_visualization", "machine_learning", "model_evaluation"],
+    "learningPhases": [
+      {"phase": 1, "title": "Data Tools", "skills": ["python_foundations", "sql_databases"]},
+      {"phase": 2, "title": "Statistics", "skills": ["statistics_probability", "data_visualization"]},
+      {"phase": 3, "title": "Predictive Modeling", "skills": ["machine_learning", "model_evaluation"]}
+    ]
+  },
+  {
+    "id": "car_da",
+    "title": "Data Analyst",
+    "description": "Analyses structured datasets to generate actionable business reporting and BI dashboards.",
+    "icon": "trending-up",
+    "matchScore": 91,
+    "readinessScore": 82,
+    "estimatedMonths": 2,
+    "salaryRange": "$70,000 - $110,000",
+    "demandGrowth": "+22% YoY",
+    "topCompanies": ["McKinsey", "Deloitte", "Accenture", "startups"],
+    "typicalProjects": ["Sales Dashboard", "Customer Segmentation", "KPI Reporting System"],
+    "certifications": ["Google Data Analytics Certificate", "Microsoft Power BI Analyst"],
+    "requiredSkills": [
+      {"name": "SQL & Databases", "importance": 90},
+      {"name": "Python Foundations", "importance": 75},
+      {"name": "Statistics & Probability", "importance": 80},
+      {"name": "Data Visualization", "importance": 90},
+      {"name": "Excel & Spreadsheets", "importance": 70}
+    ],
+    "recommendedSequence": ["sql_databases", "python_foundations", "statistics_probability", "data_visualization"],
+    "learningPhases": [
+      {"phase": 1, "title": "SQL & Data Tools", "skills": ["sql_databases", "python_foundations"]},
+      {"phase": 2, "title": "Analysis Skills", "skills": ["statistics_probability", "data_visualization"]}
+    ]
+  },
+  {
+    "id": "car_software_engineer",
+    "title": "Software Engineer",
+    "description": "Designs and builds scalable software applications, APIs, and systems across the full technology stack.",
+    "icon": "code",
+    "matchScore": 78,
+    "readinessScore": 70,
+    "estimatedMonths": 3,
+    "salaryRange": "$100,000 - $160,000",
+    "demandGrowth": "+25% YoY",
+    "topCompanies": ["Google", "Microsoft", "Amazon", "startups everywhere"],
+    "typicalProjects": ["REST API", "Web Application", "Microservices Architecture"],
+    "certifications": ["AWS Solutions Architect", "Google Associate Cloud Engineer"],
+    "requiredSkills": [
+      {"name": "Python Foundations", "importance": 85},
+      {"name": "Data Structures & Algorithms", "importance": 90},
+      {"name": "Software Engineering Principles", "importance": 85},
+      {"name": "Web Development Fundamentals", "importance": 75},
+      {"name": "SQL & Databases", "importance": 80},
+      {"name": "Cloud Platforms", "importance": 70}
+    ],
+    "recommendedSequence": ["python_foundations", "data_structures", "sql_databases", "software_engineering", "web_development", "cloud_platforms"],
+    "learningPhases": [
+      {"phase": 1, "title": "Programming Core", "skills": ["python_foundations", "data_structures"]},
+      {"phase": 2, "title": "Systems & Web", "skills": ["software_engineering", "web_development", "sql_databases"]},
+      {"phase": 3, "title": "Cloud & Scale", "skills": ["cloud_platforms"]}
+    ]
+  },
+  {
+    "id": "car_cybersecurity",
+    "title": "Cybersecurity Analyst",
+    "description": "Protects systems, networks, and data from cyber threats through monitoring, analysis, and defence strategies.",
+    "icon": "shield",
+    "matchScore": 65,
+    "readinessScore": 52,
+    "estimatedMonths": 5,
+    "salaryRange": "$90,000 - $140,000",
+    "demandGrowth": "+35% YoY",
+    "topCompanies": ["Palo Alto Networks", "CrowdStrike", "government agencies"],
+    "typicalProjects": ["Penetration Testing", "SIEM Dashboard", "Incident Response Playbook"],
+    "certifications": ["CompTIA Security+", "Certified Ethical Hacker (CEH)", "CISSP"],
+    "requiredSkills": [
+      {"name": "Networking Basics", "importance": 90},
+      {"name": "Cybersecurity Fundamentals", "importance": 95},
+      {"name": "Python Foundations", "importance": 75},
+      {"name": "Linux & Command Line", "importance": 85},
+      {"name": "Cryptography", "importance": 80}
+    ],
+    "recommendedSequence": ["networking_basics", "python_foundations", "cybersecurity_fundamentals"],
+    "learningPhases": [
+      {"phase": 1, "title": "Networking & OS", "skills": ["networking_basics"]},
+      {"phase": 2, "title": "Security Core", "skills": ["cybersecurity_fundamentals", "python_foundations"]}
+    ]
+  },
+  {
+    "id": "car_cloud_engineer",
+    "title": "Cloud Engineer",
+    "description": "Designs and manages cloud infrastructure, services, and architectures on platforms like AWS, GCP, and Azure.",
+    "icon": "cloud",
+    "matchScore": 70,
+    "readinessScore": 58,
+    "estimatedMonths": 4,
+    "salaryRange": "$110,000 - $165,000",
+    "demandGrowth": "+38% YoY",
+    "topCompanies": ["AWS", "Microsoft Azure", "Google Cloud", "HashiCorp"],
+    "typicalProjects": ["Cloud Migration", "Serverless API", "Auto-scaling Infrastructure"],
+    "certifications": ["AWS Solutions Architect Associate", "Google Associate Cloud Engineer", "Azure Administrator"],
+    "requiredSkills": [
+      {"name": "Cloud Platforms", "importance": 95},
+      {"name": "Docker & Kubernetes", "importance": 85},
+      {"name": "Networking Basics", "importance": 80},
+      {"name": "Python Foundations", "importance": 75},
+      {"name": "Software Engineering Principles", "importance": 70}
+    ],
+    "recommendedSequence": ["programming_fundamentals", "networking_basics", "python_foundations", "cloud_platforms", "docker_kubernetes"],
+    "learningPhases": [
+      {"phase": 1, "title": "Infrastructure Basics", "skills": ["networking_basics", "python_foundations"]},
+      {"phase": 2, "title": "Cloud & Containers", "skills": ["cloud_platforms", "docker_kubernetes"]}
+    ]
+  },
+  {
+    "id": "car_devops",
+    "title": "DevOps Engineer",
+    "description": "Bridges software development and IT operations through CI/CD pipelines, automation, and infrastructure as code.",
+    "icon": "git-branch",
+    "matchScore": 68,
+    "readinessScore": 55,
+    "estimatedMonths": 4,
+    "salaryRange": "$105,000 - $155,000",
+    "demandGrowth": "+31% YoY",
+    "topCompanies": ["GitLab", "HashiCorp", "Red Hat", "any tech startup"],
+    "typicalProjects": ["CI/CD Pipeline", "Kubernetes Deployment", "Infrastructure as Code"],
+    "certifications": ["AWS DevOps Professional", "Certified Kubernetes Administrator (CKA)"],
+    "requiredSkills": [
+      {"name": "Docker & Kubernetes", "importance": 90},
+      {"name": "Cloud Platforms", "importance": 85},
+      {"name": "Python Foundations", "importance": 80},
+      {"name": "Networking Basics", "importance": 80},
+      {"name": "Software Engineering Principles", "importance": 75}
+    ],
+    "recommendedSequence": ["python_foundations", "networking_basics", "docker_kubernetes", "cloud_platforms", "software_engineering"],
+    "learningPhases": [
+      {"phase": 1, "title": "Core Skills", "skills": ["python_foundations", "networking_basics"]},
+      {"phase": 2, "title": "DevOps Tools", "skills": ["docker_kubernetes", "cloud_platforms"]}
+    ]
+  },
+  {
+    "id": "car_ux_designer",
+    "title": "UI/UX Designer",
+    "description": "Creates intuitive, beautiful digital experiences through user research, wireframing, prototyping, and testing.",
+    "icon": "palette",
+    "matchScore": 60,
+    "readinessScore": 50,
+    "estimatedMonths": 3,
+    "salaryRange": "$80,000 - $130,000",
+    "demandGrowth": "+20% YoY",
+    "topCompanies": ["Apple", "Figma", "any product company"],
+    "typicalProjects": ["Mobile App Design", "Design System", "Usability Study"],
+    "certifications": ["Google UX Design Certificate", "Interaction Design Foundation"],
+    "requiredSkills": [
+      {"name": "UI/UX Design Principles", "importance": 95},
+      {"name": "Figma & Design Tools", "importance": 90},
+      {"name": "User Research Methods", "importance": 85},
+      {"name": "Web Development Fundamentals", "importance": 60}
+    ],
+    "recommendedSequence": ["ui_ux_design", "web_development"],
+    "learningPhases": [
+      {"phase": 1, "title": "Design Fundamentals", "skills": ["ui_ux_design"]},
+      {"phase": 2, "title": "Implementation", "skills": ["web_development"]}
+    ]
+  }
+]

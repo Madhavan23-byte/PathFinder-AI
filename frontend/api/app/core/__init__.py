@@ -1,0 +1,1 @@
+"""PathFinder Backend — Core package."""

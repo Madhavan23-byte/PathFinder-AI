@@ -1,0 +1,223 @@
+[
+  {
+    "id": "q_py_01", "skill": "Python Foundations", "difficulty": "Easy",
+    "question": "What will this code print?\n```python\nx = 10\ny = x + 5\nx = 20\nprint(y)\n```",
+    "options": ["25", "15", "20", "Error"],
+    "correctIndex": 1,
+    "conceptTag": "Variable Assignment",
+    "skillId": "python_foundations"
+  },
+  {
+    "id": "q_py_02", "skill": "Python Foundations", "difficulty": "Easy",
+    "question": "Which Python data structure maintains insertion order AND allows duplicate values?",
+    "options": ["set", "dict", "list", "frozenset"],
+    "correctIndex": 2,
+    "conceptTag": "Data Structures",
+    "skillId": "python_foundations"
+  },
+  {
+    "id": "q_py_03", "skill": "Python Foundations", "difficulty": "Intermediate",
+    "question": "What does the following list comprehension return?\n```python\n[x**2 for x in range(5) if x % 2 == 0]\n```",
+    "options": ["[0, 4, 16]", "[0, 1, 4, 9, 16]", "[1, 9]", "[4, 16]"],
+    "correctIndex": 0,
+    "conceptTag": "List Comprehensions",
+    "skillId": "python_foundations"
+  },
+  {
+    "id": "q_py_04", "skill": "Python Foundations", "difficulty": "Intermediate",
+    "question": "In Python, what is the difference between a shallow copy and a deep copy of a list?",
+    "options": [
+      "Shallow copy copies references; deep copy copies values recursively",
+      "Shallow copy is faster; deep copy is slower",
+      "There is no difference in Python",
+      "Shallow copy only works for lists; deep copy works for all objects"
+    ],
+    "correctIndex": 0,
+    "conceptTag": "Memory Management",
+    "skillId": "python_foundations"
+  },
+  {
+    "id": "q_stat_01", "skill": "Statistics & Probability", "difficulty": "Easy",
+    "question": "A dataset is [2, 4, 4, 4, 5, 5, 7, 9]. What is the variance?",
+    "options": ["2.0", "4.0", "5.0", "3.5"],
+    "correctIndex": 1,
+    "conceptTag": "Variance",
+    "skillId": "statistics_probability"
+  },
+  {
+    "id": "q_stat_02", "skill": "Statistics & Probability", "difficulty": "Intermediate",
+    "question": "When evaluating a binary classifier with HIGH class imbalance, which metric is LEAST informative?",
+    "options": ["ROC-AUC", "Precision-Recall AUC", "Standard Classification Accuracy", "F1-Score"],
+    "correctIndex": 2,
+    "conceptTag": "Evaluation Metrics",
+    "skillId": "statistics_probability"
+  },
+  {
+    "id": "q_stat_03", "skill": "Statistics & Probability", "difficulty": "Intermediate",
+    "question": "In a normal distribution, what percentage of data falls within 2 standard deviations of the mean?",
+    "options": ["68%", "90%", "95%", "99.7%"],
+    "correctIndex": 2,
+    "conceptTag": "Normal Distribution",
+    "skillId": "statistics_probability"
+  },
+  {
+    "id": "q_stat_04", "skill": "Statistics & Probability", "difficulty": "Advanced",
+    "question": "You flip a fair coin 10 times and get 8 heads. What is the p-value for testing H0: p=0.5 (two-tailed)?",
+    "options": [
+      "~0.11 (fail to reject H0)",
+      "~0.05 (borderline reject H0)",
+      "~0.01 (strongly reject H0)",
+      "~0.50 (completely expected)"
+    ],
+    "correctIndex": 0,
+    "conceptTag": "Hypothesis Testing",
+    "skillId": "statistics_probability"
+  },
+  {
+    "id": "q_ml_01", "skill": "Machine Learning Fundamentals", "difficulty": "Intermediate",
+    "question": "A Decision Tree achieves 99% training accuracy but 62% validation accuracy. What is this called?",
+    "options": ["Underfitting", "Overfitting (High Variance)", "Optimal Convergence", "Data Leakage"],
+    "correctIndex": 1,
+    "conceptTag": "Overfitting",
+    "skillId": "machine_learning"
+  },
+  {
+    "id": "q_ml_02", "skill": "Machine Learning Fundamentals", "difficulty": "Easy",
+    "question": "In supervised learning, what does the model learn from?",
+    "options": [
+      "Unlabelled data only",
+      "Labelled input-output pairs",
+      "Reward signals from the environment",
+      "Randomly generated data"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Supervised Learning",
+    "skillId": "machine_learning"
+  },
+  {
+    "id": "q_ml_03", "skill": "Machine Learning Fundamentals", "difficulty": "Intermediate",
+    "question": "Which regularisation technique randomly sets neuron outputs to zero during training?",
+    "options": ["L1 (Lasso)", "L2 (Ridge)", "Dropout", "Batch Normalisation"],
+    "correctIndex": 2,
+    "conceptTag": "Regularisation",
+    "skillId": "machine_learning"
+  },
+  {
+    "id": "q_ml_04", "skill": "Machine Learning Fundamentals", "difficulty": "Advanced",
+    "question": "You have 100 features. After applying PCA, you retain 95% of variance with 15 components. What has PCA done?",
+    "options": [
+      "Selected the 15 most important original features",
+      "Created 15 new orthogonal features that are linear combinations of the originals",
+      "Removed 85 features that were duplicate",
+      "Compressed the dataset by 85% without any information loss"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Dimensionality Reduction",
+    "skillId": "machine_learning"
+  },
+  {
+    "id": "q_eval_01", "skill": "Model Evaluation & Tuning", "difficulty": "Intermediate",
+    "question": "A fraud detector flags 90 real frauds, misses 10, and incorrectly flags 20 legit transactions. What is Precision?",
+    "options": [
+      "81.8% — Precision = 90 / (90 + 20)",
+      "90.0% — Precision = 90 / (90 + 10)",
+      "75.0% — Precision = 90 / (90 + 30)",
+      "95.0% — Precision = 190 / 200"
+    ],
+    "correctIndex": 0,
+    "conceptTag": "Confusion Matrix",
+    "skillId": "model_evaluation"
+  },
+  {
+    "id": "q_eval_02", "skill": "Model Evaluation & Tuning", "difficulty": "Advanced",
+    "question": "When should you prefer Recall over Precision in a classification task?",
+    "options": [
+      "When false negatives are more costly than false positives (e.g. cancer detection)",
+      "When false positives are more costly than false negatives (e.g. email spam)",
+      "Always — Recall is always more important",
+      "Never — F1 is always the best metric"
+    ],
+    "correctIndex": 0,
+    "conceptTag": "Precision vs Recall",
+    "skillId": "model_evaluation"
+  },
+  {
+    "id": "q_sql_01", "skill": "SQL & Databases", "difficulty": "Easy",
+    "question": "Which SQL clause is used to filter records from an aggregate function (e.g. GROUP BY)?",
+    "options": ["WHERE", "HAVING", "ORDER BY", "FILTER"],
+    "correctIndex": 1,
+    "conceptTag": "SQL Aggregations",
+    "skillId": "sql_databases"
+  },
+  {
+    "id": "q_sql_02", "skill": "SQL & Databases", "difficulty": "Intermediate",
+    "question": "What is the result of a LEFT JOIN when no matching row exists in the right table?",
+    "options": [
+      "The left row is excluded from the result",
+      "The left row appears with NULL for all right table columns",
+      "An error is thrown",
+      "The right table's first row is used as the default"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "JOIN Types",
+    "skillId": "sql_databases"
+  },
+  {
+    "id": "q_dl_01", "skill": "Deep Learning", "difficulty": "Intermediate",
+    "question": "In a neural network, what is the purpose of an activation function?",
+    "options": [
+      "To initialise weights to small random values",
+      "To introduce non-linearity so the network can learn complex patterns",
+      "To normalise the layer outputs to zero mean",
+      "To prevent gradient explosion during backpropagation"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Activation Functions",
+    "skillId": "deep_learning"
+  },
+  {
+    "id": "q_dl_02", "skill": "Deep Learning", "difficulty": "Advanced",
+    "question": "The vanishing gradient problem occurs when gradients become too small. Which architecture best mitigates this for long sequences?",
+    "options": ["Simple RNN", "LSTM (Long Short-Term Memory)", "CNN", "Standard MLP"],
+    "correctIndex": 1,
+    "conceptTag": "Sequence Models",
+    "skillId": "deep_learning"
+  },
+  {
+    "id": "q_la_01", "skill": "Linear Algebra", "difficulty": "Intermediate",
+    "question": "Matrix A is (3,4) and matrix B is (4,2). What is the shape of A @ B?",
+    "options": ["(3, 2)", "(4, 4)", "(3, 4)", "Error — incompatible"],
+    "correctIndex": 0,
+    "conceptTag": "Matrix Multiplication",
+    "skillId": "linear_algebra"
+  },
+  {
+    "id": "q_la_02", "skill": "Linear Algebra", "difficulty": "Advanced",
+    "question": "PCA uses eigenvalue decomposition. What does the eigenvector with the LARGEST eigenvalue represent?",
+    "options": [
+      "The direction of minimum variance in the data",
+      "The direction of maximum variance in the data",
+      "A random orthogonal basis vector",
+      "The mean of the data distribution"
+    ],
+    "correctIndex": 1,
+    "conceptTag": "Eigenvalues & PCA",
+    "skillId": "linear_algebra"
+  },
+  {
+    "id": "q_ds_01", "skill": "Data Structures & Algorithms", "difficulty": "Intermediate",
+    "question": "What is the time complexity of looking up a value in a Python dictionary (hash map)?",
+    "options": ["O(n)", "O(log n)", "O(1) average", "O(n²)"],
+    "correctIndex": 2,
+    "conceptTag": "Hash Maps",
+    "skillId": "data_structures"
+  },
+  {
+    "id": "q_ds_02", "skill": "Data Structures & Algorithms", "difficulty": "Intermediate",
+    "question": "Which sorting algorithm has the best worst-case time complexity?",
+    "options": ["Bubble Sort — O(n²)", "Quick Sort — O(n log n) average, O(n²) worst", "Merge Sort — O(n log n) always", "Insertion Sort — O(n²)"],
+    "correctIndex": 2,
+    "conceptTag": "Sorting Algorithms",
+    "skillId": "data_structures"
+  }
+]

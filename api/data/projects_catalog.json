@@ -1,0 +1,212 @@
+[
+  {
+    "id": "proj_py_01",
+    "title": "Student Grade Analyzer",
+    "skillStage": "python_foundations",
+    "targetCareers": ["Data Scientist", "Data Analyst", "Software Engineer"],
+    "difficulty": "Beginner",
+    "estimatedHours": 6,
+    "description": "Build a Python program that reads student grades from a CSV, computes statistics (mean, median, pass/fail rates), and generates a simple text report.",
+    "objective": "Apply Python fundamentals to a real data processing task.",
+    "skillsUsed": ["Python Foundations", "Data Structures", "File I/O", "Statistics basics"],
+    "milestones": [
+      {"id": "m1", "title": "Read CSV data with Python", "estimatedHours": 1},
+      {"id": "m2", "title": "Compute mean, median, highest, lowest scores", "estimatedHours": 2},
+      {"id": "m3", "title": "Classify students as Pass/Fail", "estimatedHours": 1},
+      {"id": "m4", "title": "Generate and save a formatted report", "estimatedHours": 2}
+    ],
+    "evaluationCriteria": [
+      "Correct statistical calculations",
+      "Clean, readable Python code",
+      "Proper use of functions",
+      "Handles edge cases (empty files, missing values)"
+    ],
+    "expectedOutput": "A script that takes grades.csv and outputs a formatted analysis report.",
+    "portfolioValue": "Demonstrates Python proficiency and analytical thinking."
+  },
+  {
+    "id": "proj_sql_01",
+    "title": "College Course Registration Database",
+    "skillStage": "sql_databases",
+    "targetCareers": ["Data Analyst", "Data Scientist", "Software Engineer"],
+    "difficulty": "Beginner",
+    "estimatedHours": 8,
+    "description": "Design and build a relational database for a college registration system. Write SQL queries to answer business questions about enrollment, course popularity, and student performance.",
+    "objective": "Apply SQL and relational database design to a realistic system.",
+    "skillsUsed": ["SQL & Databases", "Data Modeling", "Query Optimization"],
+    "milestones": [
+      {"id": "m1", "title": "Design the ER diagram (Students, Courses, Enrollment)", "estimatedHours": 2},
+      {"id": "m2", "title": "Create tables and insert sample data", "estimatedHours": 2},
+      {"id": "m3", "title": "Write analytical queries (TOP courses, average GPA by major)", "estimatedHours": 2},
+      {"id": "m4", "title": "Write a complex report query using JOINs and window functions", "estimatedHours": 2}
+    ],
+    "evaluationCriteria": [
+      "Correct database normalization (3NF)",
+      "Efficient SQL queries",
+      "Accurate results on sample data",
+      "Handles NULL values correctly"
+    ],
+    "expectedOutput": "A SQLite database with schema, seed data, and 5+ analytical SQL queries.",
+    "portfolioValue": "Demonstrates database design and SQL query skills."
+  },
+  {
+    "id": "proj_stat_01",
+    "title": "Exam Score Distribution Analyzer",
+    "skillStage": "statistics_probability",
+    "targetCareers": ["Data Scientist", "Machine Learning Engineer", "Data Analyst"],
+    "difficulty": "Intermediate",
+    "estimatedHours": 8,
+    "description": "Perform a complete statistical analysis of an exam dataset. Apply hypothesis testing to determine if two teaching methods produce significantly different scores.",
+    "objective": "Apply descriptive and inferential statistics to draw data-driven conclusions.",
+    "skillsUsed": ["Statistics & Probability", "Python Foundations", "Data Visualization"],
+    "milestones": [
+      {"id": "m1", "title": "Load dataset and compute descriptive statistics", "estimatedHours": 1.5},
+      {"id": "m2", "title": "Visualise distributions (histogram, box plot)", "estimatedHours": 2},
+      {"id": "m3", "title": "Perform normality test (Shapiro-Wilk)", "estimatedHours": 1.5},
+      {"id": "m4", "title": "Conduct t-test and interpret p-value", "estimatedHours": 2},
+      {"id": "m5", "title": "Write a 1-page findings report", "estimatedHours": 1}
+    ],
+    "evaluationCriteria": [
+      "Correct statistical test selection",
+      "Proper interpretation of p-values",
+      "Clear visualizations",
+      "Sound written conclusions"
+    ],
+    "expectedOutput": "Jupyter notebook with statistical analysis and visualizations.",
+    "portfolioValue": "Demonstrates statistical reasoning — critical for data science interviews."
+  },
+  {
+    "id": "proj_ml_01",
+    "title": "Student Performance Predictor",
+    "skillStage": "machine_learning",
+    "targetCareers": ["Machine Learning Engineer", "Data Scientist", "AI Engineer"],
+    "difficulty": "Intermediate",
+    "estimatedHours": 12,
+    "description": "Build a machine learning model that predicts student exam performance based on study habits, attendance, and demographics. Compare multiple algorithms and select the best.",
+    "objective": "Apply the complete supervised ML pipeline on a real-world educational dataset.",
+    "skillsUsed": ["Machine Learning Fundamentals", "Python Foundations", "Statistics", "Model Evaluation"],
+    "milestones": [
+      {"id": "m1", "title": "Load and explore the dataset (EDA)", "estimatedHours": 2},
+      {"id": "m2", "title": "Preprocess: handle missing values, encode categories, scale features", "estimatedHours": 2},
+      {"id": "m3", "title": "Train Logistic Regression, Decision Tree, Random Forest", "estimatedHours": 3},
+      {"id": "m4", "title": "Evaluate each model: accuracy, precision, recall, F1", "estimatedHours": 2},
+      {"id": "m5", "title": "Tune the best model with GridSearchCV", "estimatedHours": 2},
+      {"id": "m6", "title": "Interpret feature importance and write conclusions", "estimatedHours": 1}
+    ],
+    "evaluationCriteria": [
+      "Correct preprocessing pipeline",
+      "Fair model comparison methodology",
+      "Proper evaluation metrics for the problem",
+      "Clear feature importance analysis",
+      "Reproducible code"
+    ],
+    "expectedOutput": "Jupyter notebook with trained model achieving >75% accuracy on test set.",
+    "portfolioValue": "Classic ML project — expected in every data science/ML portfolio."
+  },
+  {
+    "id": "proj_ml_02",
+    "title": "Movie Recommendation System",
+    "skillStage": "machine_learning",
+    "targetCareers": ["Machine Learning Engineer", "Data Scientist", "AI Engineer"],
+    "difficulty": "Intermediate",
+    "estimatedHours": 15,
+    "description": "Build a collaborative filtering recommendation system using matrix factorisation. Implement both user-based and item-based approaches.",
+    "objective": "Understand recommender systems — used by Netflix, YouTube, and Spotify.",
+    "skillsUsed": ["Machine Learning Fundamentals", "Linear Algebra", "Python Foundations"],
+    "milestones": [
+      {"id": "m1", "title": "Load MovieLens dataset and explore rating patterns", "estimatedHours": 2},
+      {"id": "m2", "title": "Implement user-based collaborative filtering", "estimatedHours": 3},
+      {"id": "m3", "title": "Implement item-based collaborative filtering", "estimatedHours": 3},
+      {"id": "m4", "title": "Implement matrix factorization (SVD)", "estimatedHours": 4},
+      {"id": "m5", "title": "Evaluate using RMSE and generate top-N recommendations", "estimatedHours": 2},
+      {"id": "m6", "title": "Build a simple CLI interface", "estimatedHours": 1}
+    ],
+    "evaluationCriteria": [
+      "Correct similarity calculations",
+      "Sensible recommendations on test users",
+      "Below 1.0 RMSE on ratings",
+      "Clean, modular code"
+    ],
+    "expectedOutput": "A recommendation system CLI that takes a user ID and returns top-10 movie recommendations.",
+    "portfolioValue": "Recommender systems are asked about in virtually every ML engineer interview."
+  },
+  {
+    "id": "proj_dl_01",
+    "title": "Image Classifier (CIFAR-10)",
+    "skillStage": "deep_learning",
+    "targetCareers": ["AI Engineer", "Machine Learning Engineer"],
+    "difficulty": "Advanced",
+    "estimatedHours": 15,
+    "description": "Build a Convolutional Neural Network to classify images into 10 categories (CIFAR-10 dataset). Apply transfer learning with a pre-trained ResNet model.",
+    "objective": "Master CNNs and transfer learning — the core of computer vision.",
+    "skillsUsed": ["Deep Learning", "Python Foundations", "Linear Algebra"],
+    "milestones": [
+      {"id": "m1", "title": "Load and preprocess CIFAR-10, visualise samples", "estimatedHours": 2},
+      {"id": "m2", "title": "Build and train a custom CNN from scratch", "estimatedHours": 4},
+      {"id": "m3", "title": "Apply transfer learning with pre-trained ResNet18", "estimatedHours": 4},
+      {"id": "m4", "title": "Compare accuracy: scratch vs. transfer learning", "estimatedHours": 2},
+      {"id": "m5", "title": "Visualise filters and activation maps", "estimatedHours": 3}
+    ],
+    "evaluationCriteria": [
+      "Custom CNN achieves >70% test accuracy",
+      "Transfer learning achieves >85% test accuracy",
+      "Proper train/val/test split",
+      "No data leakage"
+    ],
+    "expectedOutput": "Trained model with inference demo showing predictions on new images.",
+    "portfolioValue": "CNN + transfer learning is the foundation of all computer vision applications."
+  },
+  {
+    "id": "proj_nlp_01",
+    "title": "AI Career Mentor Chatbot",
+    "skillStage": "nlp",
+    "targetCareers": ["AI Engineer", "Machine Learning Engineer"],
+    "difficulty": "Advanced",
+    "estimatedHours": 20,
+    "description": "Build a RAG-based (Retrieval-Augmented Generation) career mentor chatbot that answers questions about AI careers using a knowledge base of job descriptions and skills.",
+    "objective": "Implement a production-grade LLM application using modern AI engineering patterns.",
+    "skillsUsed": ["Natural Language Processing", "Deep Learning", "Python Foundations", "MLOps"],
+    "milestones": [
+      {"id": "m1", "title": "Prepare knowledge base (career docs, job descriptions)", "estimatedHours": 3},
+      {"id": "m2", "title": "Implement text chunking and embedding generation", "estimatedHours": 4},
+      {"id": "m3", "title": "Set up vector store (FAISS or ChromaDB)", "estimatedHours": 3},
+      {"id": "m4", "title": "Implement retrieval + LLM generation pipeline", "estimatedHours": 5},
+      {"id": "m5", "title": "Build a FastAPI backend and simple chat UI", "estimatedHours": 5}
+    ],
+    "evaluationCriteria": [
+      "Retrieves relevant context for career questions",
+      "Generates coherent, factual responses",
+      "Handles out-of-scope questions gracefully",
+      "Response latency under 5 seconds"
+    ],
+    "expectedOutput": "A running chatbot with web interface that answers career questions using the knowledge base.",
+    "portfolioValue": "RAG applications are the #1 most in-demand AI engineering skill right now."
+  },
+  {
+    "id": "proj_mlops_01",
+    "title": "ML Model Deployment Pipeline",
+    "skillStage": "mlops",
+    "targetCareers": ["Machine Learning Engineer", "DevOps Engineer", "Cloud Engineer"],
+    "difficulty": "Advanced",
+    "estimatedHours": 20,
+    "description": "Take a trained ML model and build a complete production deployment pipeline with FastAPI serving, Docker containerisation, and automated testing.",
+    "objective": "Bridge the gap between model training and production deployment.",
+    "skillsUsed": ["MLOps & Deployment", "Docker & Kubernetes", "Python Foundations", "Cloud Platforms"],
+    "milestones": [
+      {"id": "m1", "title": "Wrap a trained model in a FastAPI prediction endpoint", "estimatedHours": 3},
+      {"id": "m2", "title": "Write unit tests for the prediction logic", "estimatedHours": 3},
+      {"id": "m3", "title": "Containerise with Docker and test locally", "estimatedHours": 4},
+      {"id": "m4", "title": "Add logging, health checks, and error handling", "estimatedHours": 4},
+      {"id": "m5", "title": "Deploy to a cloud platform (AWS/GCP/Heroku)", "estimatedHours": 4},
+      {"id": "m6", "title": "Add model monitoring (track prediction drift)", "estimatedHours": 2}
+    ],
+    "evaluationCriteria": [
+      "API responds correctly to valid and invalid inputs",
+      "Docker container runs without errors",
+      "Tests pass with >90% coverage",
+      "Live URL accessible on the internet"
+    ],
+    "expectedOutput": "A live API endpoint on the internet that serves ML predictions.",
+    "portfolioValue": "The #1 skill that separates ML engineers from data scientists."
+  }
+]
