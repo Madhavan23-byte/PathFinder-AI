@@ -55,4 +55,8 @@ def update_profile(data: ProfileUpdateSchema, user_id: str = Depends(get_current
     if updates:
         profiles_collection.update_one({"user_id": user_id}, {"$set": updates}, upsert=True)
 
+    if data.targetCareer:
+        from app.routers.career import _regenerate_roadmap
+        _regenerate_roadmap(user_id, data.targetCareer)
+
     return get_profile(user_id)

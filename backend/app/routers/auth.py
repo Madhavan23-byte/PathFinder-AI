@@ -3,7 +3,8 @@ PathFinder Backend — Authentication Router
 Handles user registration, login, logout, and password reset.
 """
 import time
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends, Header
 
 from app.database import (
     users_collection,
@@ -138,7 +139,16 @@ def login(data: LoginSchema):
 
 
 @router.post("/logout")
-def logout():
+def logout(authorization: str = Header(None)):
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+        from app.database import db
+        token_blocklist_collection = db["token_blocklist"]
+        if not token_blocklist_collection.find_one({"token": token}):
+            token_blocklist_collection.insert_one({
+                "token": token,
+                "revokedAt": time.strftime("%Y-%m-%d %H:%M:%S")
+            })
     return {"message": "Successfully logged out"}
 
 
@@ -158,9 +168,40 @@ def get_me(user_id: str = Depends(get_current_user_id)):
 
 @router.post("/forgot-password")
 def forgot_password(data: ForgotPasswordSchema):
+    clean_email = data.email.strip().lower()
+    user_doc = users_collection.find_one({"email": clean_email})
+    if user_doc:
+        import secrets
+        reset_token = secrets.token_urlsafe(32)
+        from app.database import db
+        password_resets_collection = db["password_resets"]
+        password_resets_collection.update_one(
+            {"email": clean_email},
+            {"$set": {
+                "token": reset_token,
+                "expiresAt": int(time.time()) + 3600
+            }},
+            upsert=True
+        )
+        print(f"[RESET TOKEN FOR {clean_email}]: {reset_token}")
+        
     return {"message": "If an account exists with this email, password reset instructions have been sent."}
 
 
 @router.post("/reset-password")
 def reset_password(data: ResetPasswordSchema):
+    from app.database import db
+    password_resets_collection = db["password_resets"]
+    
+    reset_doc = password_resets_collection.find_one({"token": data.token})
+    if not reset_doc or reset_doc.get("expiresAt", 0) < int(time.time()):
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+        
+    hashed = hash_password(data.password)
+    users_collection.update_one(
+        {"email": reset_doc["email"]},
+        {"$set": {"password": hashed}}
+    )
+    password_resets_collection.delete_one({"token": data.token})
+    
     return {"message": "Password updated successfully."}

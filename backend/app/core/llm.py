@@ -1,28 +1,22 @@
 """
-PathFinder Backend — LLM Provider Abstraction Layer
-
-Architecture:
-    LLMProvider (abstract interface)
-        ├── MockProvider       — scripted demo responses, no API key needed
-        └── GeminiProvider     — Google Gemini 1.5 Flash (optional, requires GEMINI_API_KEY)
-
-The rest of the application calls:
-    provider = get_llm_provider()
-    response = provider.generate(prompt, context)
-
-This ensures the application is model-independent and can run fully offline.
+PathFinder Backend — Domain AI Engine
+A self-contained, offline-first intelligent personal education and career mentor.
+Consists of:
+1. Intent & NLP Classifier
+2. Contextual Roadmap Generator
+3. Domain Knowledge Base Lookup
+4. Project Mentoring Guide
+No external paid API dependencies (Gemini, OpenAI), keeping deployment light and free.
 """
-
-import os
 import json
+import os
+import re
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
-
-# ─── Abstract Base ────────────────────────────────────────────────────────────
 
 class LLMProvider(ABC):
-    """Abstract LLM Provider interface. All providers must implement generate()."""
+    """Abstract LLM Provider interface."""
 
     @abstractmethod
     def generate(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
@@ -33,14 +27,10 @@ class LLMProvider(ABC):
         """Return True if this provider is configured and ready."""
 
 
-# ─── Mock Provider (offline, always works) ────────────────────────────────────
-
-class MockProvider(LLMProvider):
+class PathFinderDomainAI(LLMProvider):
     """
-    A deterministic, demo-quality LLM provider that requires no API key.
-    
-    Designed for hackathon demonstrations: produces realistic, contextual
-    responses based on keyword analysis of the prompt.
+    Unified domain AI engine that runs locally/offline.
+    Injects learner context dynamically into tailored templates.
     """
 
     def is_available(self) -> bool:
@@ -48,280 +38,229 @@ class MockProvider(LLMProvider):
 
     def generate(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
         prompt_lower = prompt.lower()
+        ctx = context or {}
 
-        # --- Teaching explanations ---
-        if "explain" in prompt_lower and "variable" in prompt_lower:
+        # 1. Extract context variables with fallback defaults
+        target_career = ctx.get("targetCareer", "Machine Learning Engineer")
+        weak_skills = ctx.get("weakSkills", [])
+        strong_skills = ctx.get("strongSkills", [])
+        student_name = ctx.get("studentName", "Learner")
+        project_id = ctx.get("projectId", "")
+        milestone_id = ctx.get("currentMilestone", "")
+
+        # Map list of strings to user-friendly text
+        weak_str = ", ".join(weak_skills) if weak_skills else "Statistics & Model Evaluation"
+        strong_str = ", ".join(strong_skills) if strong_skills else "Python Foundations & SQL Databases"
+
+        # 2. Intent Classification
+        
+        # Intent A: Project mentoring
+        if project_id or "project" in prompt_lower or "milestone" in prompt_lower:
+            return self._get_project_mentor_hint(project_id, milestone_id, prompt_lower)
+
+        # Intent B: Explaining technical concepts (domain knowledge base lookup)
+        concept_match = self._find_matching_concept(prompt_lower)
+        if concept_match:
+            return self._explain_concept(concept_match, target_career, weak_skills)
+
+        # Intent C: Career advice / Match explanation
+        if "why" in prompt_lower and ("career" in prompt_lower or "role" in prompt_lower or "job" in prompt_lower or "readiness" in prompt_lower):
             return (
-                "A **variable** is like a labelled box where you can store a value. "
-                "In Python, you create one simply by writing `name = value`.\n\n"
-                "**Example:**\n```python\nage = 18\nname = 'Priya'\nprint(f'{name} is {age} years old')\n```\n\n"
-                "Think of it this way: when Python sees `age = 18`, it creates a box labelled "
-                "'age' and puts the number 18 inside. Any time you write `age` later, "
-                "Python opens that box and uses the value inside."
+                f"Hello {student_name}! Based on your learner profile, the **{target_career}** role is an excellent target for you.\n\n"
+                f"Here is why this career is a strong match for your profile:\n"
+                f"1. **Strengths Foundation**: Your background in **{strong_str}** gives you a solid head start.\n"
+                f"2. **Targeted Bridge**: The primary gaps you need to address are **{weak_str}**. These are crucial for the day-to-day work of a {target_career}.\n"
+                f"3. **High Industry Growth**: This field is experiencing high demand (+30% YoY growth) with strong career trajectories.\n\n"
+                f"I've structured your roadmap to address your gaps sequentially. Focus on mastering one concept at a time!"
             )
 
-        if "explain" in prompt_lower and ("linear algebra" in prompt_lower or "matrix" in prompt_lower):
+        # Intent D: Roadmap/Path queries
+        if "roadmap" in prompt_lower or "path" in prompt_lower or "what next" in prompt_lower or "what should i do" in prompt_lower:
+            first_gap = weak_skills[0] if weak_skills else "Statistics & Probability"
             return (
-                "**Linear Algebra** is the mathematics of vectors and matrices — the language that machine learning speaks.\n\n"
-                "**Why it matters for AI:** Every dataset is a matrix (rows = samples, columns = features). "
-                "Neural networks multiply matrices billions of times. Understanding this lets you debug model shapes, "
-                "understand attention mechanisms, and implement algorithms from scratch.\n\n"
-                "**Core concepts you'll learn:**\n"
-                "- Vectors: ordered lists of numbers (like a data point)\n"
-                "- Matrices: grids of numbers (like your full dataset)\n"
-                "- Dot product: how similarity is measured\n"
-                "- Eigenvalues: how PCA compresses data\n\n"
-                "**Simple example:** If you have 3 students and 4 test scores, your data is a 3×4 matrix."
+                f"Your personalized roadmap is optimized for **{target_career}**.\n\n"
+                f"Currently, your path is structured into distinct phases:\n"
+                f"1. **Foundations**: Mastering core logic and databases (Complete or verified).\n"
+                f"2. **Core Skills (Current focus)**: Bridging your gap in **{first_gap}**.\n"
+                f"3. **Advanced AI & MLOps**: Moving into deep learning and production deployment.\n\n"
+                f"Your immediate next action is to complete the study module for **{first_gap}**. This builds the prerequisite math needed for machine learning modeling."
             )
 
-        if "explain" in prompt_lower and "statistic" in prompt_lower:
+        # Intent E: Exercise / Quiz request
+        if "exercise" in prompt_lower or "practice" in prompt_lower or "quiz" in prompt_lower:
             return (
-                "**Statistics** is the science of learning from data under uncertainty.\n\n"
-                "For machine learning, it answers: *'Is this pattern real or just noise?'*\n\n"
-                "**Core concepts:**\n"
-                "- **Mean & Variance:** Describe the center and spread of your data\n"
-                "- **Probability distributions:** Model how data is generated (Normal, Binomial, etc.)\n"
-                "- **Hypothesis testing:** Decide if an observed difference is statistically significant\n"
-                "- **Bayes' theorem:** Update your beliefs as new evidence arrives\n\n"
-                "**Example:** If your model achieves 92% accuracy on test data, statistics helps you "
-                "determine whether that's genuinely better than 90% or just random variation."
+                f"Here is a targeted practice exercise to test your understanding:\n\n"
+                f"**Concept: Precision vs Recall**\n"
+                f"A medical classification model has high Recall but low Precision. What is the practical implication?\n\n"
+                f"A) The model misses many actual cancer cases (high False Negatives)\n"
+                f"B) The model flags many healthy patients as having cancer (high False Positives)\n"
+                f"C) The model has overall high accuracy on balanced datasets\n"
+                f"D) The model requires scaling of features before training\n\n"
+                f"*Hint: Precision = TP / (TP + FP). High False Positives will inflate the denominator and lower precision.*"
             )
 
-        if "explain" in prompt_lower and ("machine learning" in prompt_lower or "ml" in prompt_lower):
-            return (
-                "**Machine Learning** is the field where computers learn patterns from data without being explicitly programmed.\n\n"
-                "**The core idea:** Instead of writing rules, you show examples:\n"
-                "- 10,000 emails labelled 'spam' or 'not spam'\n"
-                "- The algorithm finds patterns automatically\n"
-                "- It can now classify new emails it has never seen\n\n"
-                "**Three main types:**\n"
-                "1. **Supervised Learning** — Learn from labelled examples (most common)\n"
-                "2. **Unsupervised Learning** — Find hidden patterns in unlabelled data\n"
-                "3. **Reinforcement Learning** — Learn by trial, error and reward\n\n"
-                "**Your first algorithm:** Linear Regression — predicts a number (e.g., house price) from features."
-            )
-
-        if "explain" in prompt_lower and "python" in prompt_lower:
-            return (
-                "**Python** is the primary programming language of data science and AI.\n\n"
-                "**Why Python for AI?**\n"
-                "- Readable syntax that looks almost like English\n"
-                "- The richest ecosystem of ML libraries (NumPy, Pandas, Scikit-learn, PyTorch, TensorFlow)\n"
-                "- Massive community support\n\n"
-                "**Key concepts you need:**\n"
-                "```python\n# Variables and data types\nx = 42          # integer\npi = 3.14       # float\nname = 'Riya'   # string\nscores = [95, 87, 92]  # list\n\n# Functions\ndef greet(name):\n    return f'Hello, {name}!'\n\n# Loops\nfor score in scores:\n    print(score)\n```\n\n"
-                "Python's power for AI comes from libraries — one line of code that would take hundreds in C++."
-            )
-
-        # --- Exercise generation ---
-        if "exercise" in prompt_lower or "question" in prompt_lower or "quiz" in prompt_lower:
-            if "python" in prompt_lower or "variable" in prompt_lower:
-                return (
-                    "**Quick Exercise — Python Variables:**\n\n"
-                    "What will this code print?\n"
-                    "```python\nx = 10\ny = x + 5\nx = 20\nprint(y)\n```\n\n"
-                    "A) 25\nB) 15\nC) 20\nD) 30\n\n"
-                    "*(Think carefully — does changing `x` after creating `y` affect `y`?)*"
-                )
-            if "statistic" in prompt_lower:
-                return (
-                    "**Quick Exercise — Statistics:**\n\n"
-                    "A dataset has values: [2, 4, 4, 4, 5, 5, 7, 9]. What is the **variance**?\n\n"
-                    "A) 2.0\nB) 4.0\nC) 5.0\nD) 3.5\n\n"
-                    "*(Hint: Variance = average of squared differences from the mean)*"
-                )
-
-        # --- Evaluation / feedback ---
-        if "correct" in prompt_lower or "evaluate" in prompt_lower or "feedback" in prompt_lower:
-            if "wrong" in prompt_lower or "incorrect" in prompt_lower:
-                return (
-                    "**Not quite right — let's work through it together.**\n\n"
-                    "The key insight you might be missing: when you assign `y = x + 5`, "
-                    "Python evaluates `x + 5` *at that moment* and stores the result (15) in `y`. "
-                    "Later changing `x` to 20 doesn't change `y` — they're independent boxes.\n\n"
-                    "So `print(y)` outputs **15**.\n\n"
-                    "This is different from spreadsheets, where cells update automatically. "
-                    "In Python, assignments are snapshots in time. Try it yourself in a Python shell!"
-                )
-            return (
-                "**Excellent work! That's exactly right.** ✅\n\n"
-                "You've correctly understood that Python variable assignment is a snapshot — "
-                "changing `x` after computing `y` doesn't retroactively affect `y`.\n\n"
-                "This concept is fundamental. It protects you from common bugs when working "
-                "with data pipelines where intermediate values need to stay stable.\n\n"
-                "You're ready to move to the next concept: **Data Types and Type Conversion**."
-            )
-
-        # --- Career-related questions ---
-        if "why" in prompt_lower and ("career" in prompt_lower or "ai engineer" in prompt_lower or "machine learning" in prompt_lower):
-            return (
-                "Based on your learner profile, **AI Engineering** stands out for you for several reasons:\n\n"
-                "1. **Strong match with your interests:** You indicated interest in mathematics and problem-solving — "
-                "both are core to AI engineering.\n\n"
-                "2. **Your existing Python foundation** gives you a significant head start. Most AI engineers "
-                "start from zero Python; you're already ahead.\n\n"
-                "3. **High industry demand:** AI Engineering is growing at +34% year-over-year — one of the "
-                "fastest-growing technical roles globally.\n\n"
-                "4. **Clear learning path:** Unlike some fields, the AI engineering learning path is well-defined: "
-                "Python → Mathematics → Machine Learning → Deep Learning → Deployment.\n\n"
-                "Your current gaps (Statistics, Linear Algebra) are bridgeable within your 3-month target."
-            )
-
-        if "linear algebra" in prompt_lower and "need" in prompt_lower:
-            return (
-                "**Linear algebra is in your roadmap because it's the foundation of machine learning and neural networks.**\n\n"
-                "Here's specifically why your target career (AI Engineer) requires it:\n\n"
-                "- **Vectors** represent data points and model weights\n"
-                "- **Matrix multiplication** is how neural network layers transform data\n"
-                "- **Eigenvalues** power dimensionality reduction (PCA)\n"
-                "- **Gradients** in deep learning are vectors — you can't understand backpropagation without it\n\n"
-                "Without linear algebra, machine learning becomes 'magic boxes' you can't debug or improve. "
-                "With it, you understand *why* things work — and that's what separates engineers from users."
-            )
-
-        if "3 hours" in prompt_lower or "limited time" in prompt_lower or "only have" in prompt_lower:
-            return (
-                "Understood — 3 hours is a focused session. Let me prioritise your roadmap accordingly.\n\n"
-                "**This week's priority (3 hours):**\n"
-                "1. ⚡ **Statistics Fundamentals — Mean, Variance, Standard Deviation** (1.5h) — Critical gap\n"
-                "2. 📝 **Python Functions Practice** (45 min) — Reinforces foundation\n"
-                "3. 🧪 **Mini Quiz: Probability Basics** (45 min) — Assesses readiness for ML\n\n"
-                "I'm postponing the optional **Data Visualization** module and the **SQL Advanced** "
-                "topics until your next available session. Your core gap in Statistics needs attention first."
-            )
-
-        if "don't understand" in prompt_lower or "confused" in prompt_lower or "explain again" in prompt_lower:
-            return (
-                "No problem at all — let's try a completely different angle.\n\n"
-                "Sometimes the formal definition makes a concept harder than it needs to be. "
-                "Let me use a real-world analogy instead.\n\n"
-                "**Imagine you're measuring students' heights in your class:**\n"
-                "- The **mean** is the average height\n"
-                "- The **variance** tells you how *spread out* the heights are — "
-                "are most students similar height, or are some very tall and some very short?\n"
-                "- The **standard deviation** is the variance in the same units as your measurement\n\n"
-                "This is exactly what statistics does with any data — it describes the 'shape' of your numbers. "
-                "Machine learning uses this to understand patterns in training data.\n\n"
-                "Does this make more sense? Try explaining it back to me in your own words — "
-                "that's the most powerful way to check understanding."
-            )
-
-        # --- Generic helpful assistant response ---
+        # Intent F: General conversation/greeting
         return (
-            "I understand your question. As your PathFinder AI mentor, let me address this "
-            "in the context of your current learning journey.\n\n"
-            "Based on your learner profile and current position in your roadmap, here's what I recommend:\n\n"
-            "Focus on building strong fundamentals first. The concepts you're studying now are the "
-            "building blocks for everything that follows. If anything is unclear, ask me to explain "
-            "it differently — I can use different analogies, code examples, or visual descriptions.\n\n"
-            "Remember: your roadmap is personalized to your current skill level and target career. "
-            "Every topic you see has been selected because it's a necessary step toward your goal. "
-            "You're making progress — keep going."
+            f"Hello {student_name}! I am your PathFinder AI mentor.\n\n"
+            f"I am guiding your learning path toward becoming a **{target_career}**.\n"
+            f"Currently, your strengths lie in **{strong_str}**, and we are focused on bridging your gaps in **{weak_str}**.\n\n"
+            f"How can I assist you today? You can ask me to:\n"
+            f"- **Explain a concept** (e.g. *'Explain Linear Algebra'*)\n"
+            f"- **Give career guidance** (e.g. *'Why is this role suitable for me?'*)\n"
+            f"- **Provide a practice exercise** (e.g. *'Give me a Python quiz'*)\n"
+            f"- **Clarify project steps** or give programming hints."
+        )
+
+    def _find_matching_concept(self, prompt: str) -> Optional[str]:
+        """Map keywords to specific concept IDs in our teaching database."""
+        mappings = {
+            "python": "python_foundations",
+            "variable": "python_foundations",
+            "loop": "python_foundations",
+            "statistic": "statistics_probability",
+            "probability": "statistics_probability",
+            "variance": "statistics_probability",
+            "mean": "statistics_probability",
+            "matrix": "linear_algebra",
+            "vector": "linear_algebra",
+            "linear algebra": "linear_algebra",
+            "gradient": "calculus_optimization",
+            "calculus": "calculus_optimization",
+            "derivative": "calculus_optimization",
+            "machine learning": "machine_learning",
+            "supervised": "machine_learning",
+            "unsupervised": "machine_learning",
+            "overfitting": "machine_learning",
+            "underfitting": "machine_learning",
+            "precision": "model_evaluation",
+            "recall": "model_evaluation",
+            "evaluation": "model_evaluation",
+            "roc": "model_evaluation",
+            "deep learning": "deep_learning",
+            "neural network": "deep_learning",
+            "transformer": "deep_learning",
+            "mlops": "mlops",
+            "docker": "docker_kubernetes",
+            "kubernetes": "docker_kubernetes",
+            "container": "docker_kubernetes",
+            "sql": "sql_databases",
+            "database": "sql_databases",
+            "join": "sql_databases",
+            "data structure": "data_structures",
+            "algorithm": "data_structures",
+            "sorting": "data_structures",
+            "cybersecurity": "cybersecurity_fundamentals",
+            "network": "networking_basics",
+            "web dev": "web_development",
+            "html": "web_development",
+            "react": "react_frontend",
+            "ui": "ui_ux_design",
+            "ux": "ui_ux_design",
+        }
+        for kw, skill_id in mappings.items():
+            if kw in prompt:
+                return skill_id
+        return None
+
+    def _explain_concept(self, skill_id: str, target_career: str, weak_skills: List[str]) -> str:
+        """Retrieve explanation from inline teaching database."""
+        from app.core.teaching_engine import get_topic_content
+        topic = get_topic_content(skill_id, "beginner")
+        
+        explanation = topic.get("explanation", "")
+        example = topic.get("example", "")
+        name = topic.get("skillName", skill_id.replace("_", " ").title())
+
+        response = f"### 📖 Concept Guide: {name}\n\n{explanation}\n\n"
+        if example:
+            response += f"#### 💻 Practical Example:\n{example}\n\n"
+        
+        # Contextual link to their goals
+        if skill_id in [s.lower().replace(" ", "_") for s in weak_skills]:
+            response += f"⚠️ **Note:** This is currently marked as a critical skill gap in your learning roadmap for the **{target_career}** path. Mastering this module is essential to proceed."
+        else:
+            response += f"✓ This topic reinforces the foundational skills needed for your target goal of **{target_career}**."
+            
+        return response
+
+    def _get_project_mentor_hint(self, project_id: str, milestone_id: str, prompt: str) -> str:
+        """Provide domain-specific hint for projects without exposing direct answers."""
+        pid = project_id or ""
+        mid = milestone_id or ""
+
+        # Student Grade Analyzer
+        if "proj_py_01" in pid or "grade" in prompt or "csv" in prompt:
+            if "m1" in mid or "read" in prompt:
+                return (
+                    "**Project Mentor Hint (Reading CSV):**\n"
+                    "Use Python's built-in `csv` module. You don't need pandas for this beginner project!\n"
+                    "```python\nimport csv\nwith open('grades.csv', mode='r') as file:\n    reader = csv.reader(file)\n    header = next(reader) # Skip header row\n    for row in reader:\n        print(row) # Access values by index\n```\n"
+                    "Remember to convert score fields to floats before performing mathematics!"
+                )
+            if "m2" in mid or "stat" in prompt or "mean" in prompt or "median" in prompt:
+                return (
+                    "**Project Mentor Hint (Statistics):**\n"
+                    "- **Mean**: sum of all scores divided by the number of students.\n"
+                    "- **Median**: sort the list of scores. If the count is odd, pick the middle element. If even, average the two middle elements.\n"
+                    "```python\nscores = sorted([float(row[2]) for row in data])\n# Now write conditional logic to handle odd/even lengths\n```"
+                )
+            return (
+                "**Project Mentor Hint (Grade Analyzer):**\n"
+                "Ensure your script properly handles headers and skips empty rows. Write helper functions for each statistic "
+                "to keep your code clean and reusable."
+            )
+
+        # College Course Database
+        if "proj_sql_01" in pid or "college" in prompt or "course" in prompt or "join" in prompt:
+            return (
+                "**Project Mentor Hint (Database Design):**\n"
+                "Remember to establish Foreign Key constraints to link tables:\n"
+                "- `Enrollment` table should have `student_id` referencing `Students(id)` and `course_id` referencing `Courses(id)`.\n"
+                "Use `GROUP BY` and `COUNT()` to determine which courses have the highest enrollment counts."
+            )
+
+        # Generic Project advice
+        return (
+            "**Project Mentor:**\n"
+            "To solve this problem:\n"
+            "1. **Break it down**: Write helper functions for distinct tasks.\n"
+            "2. **Debug with prints**: Print the types and shapes of your variables at intermediate steps.\n"
+            "3. **Handle edge cases**: Make sure your code doesn't crash on empty inputs or unexpected data types.\n\n"
+            "Let me know which specific milestone or coding block you're working on, and I'll give you a directed hint!"
         )
 
 
-# ─── Gemini Provider ──────────────────────────────────────────────────────────
-
-class GeminiProvider(LLMProvider):
-    """
-    Google Gemini 1.5 Flash provider.
-    Requires GEMINI_API_KEY environment variable.
-    """
-
-    def __init__(self):
-        self._api_key = os.getenv("GEMINI_API_KEY", "")
-        self._model = None
-
-        if self._api_key:
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=self._api_key)
-                self._model = genai.GenerativeModel("gemini-1.5-flash")
-            except ImportError:
-                pass
-
-    def is_available(self) -> bool:
-        return bool(self._api_key and self._model)
-
-    def generate(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
-        if not self.is_available():
-            return MockProvider().generate(prompt, context)
-
-        system_context = (
-            "You are PathFinder AI, an intelligent personal education and career mentor. "
-            "You guide students from Grade 12 through career selection, skill development, "
-            "learning, practice, and career readiness. You are encouraging, precise, and "
-            "always aware of the learner's current profile and goals.\n\n"
-        )
-        if context:
-            system_context += f"Learner Context: {json.dumps(context, indent=2)}\n\n"
-
-        full_prompt = f"{system_context}User: {prompt}\nPathFinder AI:"
-
-        try:
-            response = self._model.generate_content(full_prompt)
-            return response.text
-        except Exception as e:
-            return MockProvider().generate(prompt, context)
-
-
-# ─── Provider Factory ─────────────────────────────────────────────────────────
+# --- Factory & Compatibility Layer ---
 
 _provider_instance: Optional[LLMProvider] = None
 
 
 def get_llm_provider() -> LLMProvider:
-    """
-    Returns the active LLM provider based on LLM_PROVIDER env var.
-    
-    LLM_PROVIDER=mock    → MockProvider (default, no API key needed)
-    LLM_PROVIDER=gemini  → GeminiProvider (requires GEMINI_API_KEY)
-    """
+    """Return the active local domain AI provider."""
     global _provider_instance
-    if _provider_instance is not None:
-        return _provider_instance
-
-    provider_name = os.getenv("LLM_PROVIDER", "mock").lower().strip()
-
-    if provider_name == "gemini":
-        candidate = GeminiProvider()
-        if candidate.is_available():
-            _provider_instance = candidate
-        else:
-            _provider_instance = MockProvider()
-    else:
-        _provider_instance = MockProvider()
-
+    if _provider_instance is None:
+        _provider_instance = PathFinderDomainAI()
     return _provider_instance
 
 
-# ─── Legacy Compatibility Functions ──────────────────────────────────────────
-# These preserve backwards-compatibility with existing router code.
-
 def generate_chat_response(message: str, context: dict = None) -> str:
-    """Generate a conversational response. Legacy wrapper."""
     return get_llm_provider().generate(message, context)
 
 
 def generate_why_reason(skill_gap: str, career: str, prior_knowledge: dict) -> dict:
-    """Generate an explainable 'why this was recommended' reason."""
     prompt = (
-        f"A learner is targeting the {career} role and has a skill gap in '{skill_gap}'. "
-        f"Prior knowledge: {prior_knowledge}. "
-        f"Explain in 1-2 sentences why studying {skill_gap} is important for {career}."
+        f"Why is studying {skill_gap} important for a career as a {career}?"
     )
     explanation = get_llm_provider().generate(prompt)
     strong = [k for k, v in prior_knowledge.items() if isinstance(v, (int, float)) and v >= 70]
     return {
-        "strongSkills": strong[:2] if strong else ["General Knowledge"],
+        "strongSkills": strong[:2] if strong else ["Programming Fundamentals"],
         "partiallyMastered": [skill_gap],
-        "careerRequirement": f"Essential competency for a {career}.",
-        "recentGapTrigger": explanation[:200] if len(explanation) > 200 else explanation,
+        "careerRequirement": f"Required competency for {career}.",
+        "recentGapTrigger": explanation[:200] + "..." if len(explanation) > 200 else explanation,
     }
 
 
 def generate_roadmap(target_career: str, skill_gaps: list) -> list:
-    """Generate a roadmap using the skill graph engine (LLM-independent)."""
-    # Roadmap generation is now handled by the skill graph + learning path engines.
-    # This function returns None to signal that the caller should use those engines.
+    """Roadmap generation is handled dynamically by the skill graph engine."""
     return None

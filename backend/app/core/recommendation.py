@@ -1,25 +1,73 @@
 """
 PathFinder Backend — ML Recommendation Engine
-Uses TF-IDF Vectorization and Cosine Similarity to recommend courses based on skill gaps.
+Uses pure Python TF-IDF Vectorization and Cosine Similarity to recommend courses based on skill gaps.
+No external dependencies (pandas, scikit-learn, numpy) required, keeping Vercel deployment size minimal.
 """
 import json
+import math
+import re
 from pathlib import Path
 from typing import List, Dict, Any
-
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 _CATALOG_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "courses_catalog.json"
 
 
-def _load_catalog() -> pd.DataFrame:
-    """Load the course catalog into a pandas DataFrame."""
+def tokenize(text: str) -> List[str]:
+    """Tokenize text into lowercase alphanumeric words."""
+    return re.findall(r"\b\w+\b", text.lower())
+
+
+def compute_tf(doc: List[str]) -> Dict[str, float]:
+    """Compute normalized term frequency."""
+    tf = {}
+    for word in doc:
+        tf[word] = tf.get(word, 0) + 1
+    total = len(doc)
+    return {w: count / total for w, count in tf.items()} if total > 0 else {}
+
+
+def compute_idf(docs: List[List[str]]) -> Dict[str, float]:
+    """Compute smoothed inverse document frequency."""
+    N = len(docs)
+    df = {}
+    for doc in docs:
+        unique_words = set(doc)
+        for word in unique_words:
+            df[word] = df.get(word, 0) + 1
+
+    idf = {}
+    for word, count in df.items():
+        # Smoothed IDF formula: ln(1 + N/DF) + 1
+        idf[word] = math.log(1 + N / count) + 1
+    return idf
+
+
+def tfidf(tf: Dict[str, float], idf: Dict[str, float]) -> Dict[str, float]:
+    """Calculate TF-IDF vector."""
+    return {w: val * idf.get(w, 0.0) for w, val in tf.items()}
+
+
+def cosine_similarity(v1: Dict[str, float], v2: Dict[str, float]) -> float:
+    """Compute cosine similarity between two sparse dictionaries."""
+    dot = 0.0
+    for w, val in v1.items():
+        if w in v2:
+            dot += val * v2[w]
+
+    mag1 = math.sqrt(sum(val**2 for val in v1.values()))
+    mag2 = math.sqrt(sum(val**2 for val in v2.values()))
+
+    if mag1 == 0.0 or mag2 == 0.0:
+        return 0.0
+    return dot / (mag1 * mag2)
+
+
+def _load_catalog() -> List[Dict[str, Any]]:
+    """Load the course catalog into a list of dictionaries."""
     if not _CATALOG_PATH.exists():
-        return pd.DataFrame()
+        return []
     with open(_CATALOG_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return pd.DataFrame(data)
+        return json.load(f)
 
 
 def recommend_resources(skill_gap_name: str, top_n: int = 2) -> List[Dict[str, Any]]:
@@ -27,45 +75,50 @@ def recommend_resources(skill_gap_name: str, top_n: int = 2) -> List[Dict[str, A
     Recommend top N learning resources for a given skill gap using ML.
     
     This fulfills the "AI/ML Recommendation Engine" requirement.
-    Instead of hardcoding rules, we use Natural Language Processing (TF-IDF)
-    to match the user's missing skill against course descriptions and tags.
+    Uses pure Python TF-IDF and Cosine Similarity to match the user's missing
+    skill against course descriptions and tags in courses_catalog.json.
     """
-    df = _load_catalog()
-    if df.empty:
+    catalog = _load_catalog()
+    if not catalog:
         return []
 
     # 1. Feature Engineering: Combine tags and description into a single corpus
-    df["combined_features"] = df["tags"].apply(lambda x: " ".join(x)) + " " + df["description"]
+    documents = []
+    for course in catalog:
+        tags_str = " ".join(course.get("tags", []))
+        desc = course.get("description", "")
+        combined = f"{tags_str} {desc}"
+        documents.append(tokenize(combined))
 
-    # 2. Append the target skill gap to the corpus as the query document
-    # We enhance the query slightly to improve TF-IDF matching
-    query = f"{skill_gap_name} concepts tutorials practice"
-    corpus = df["combined_features"].tolist()
-    corpus.append(query)
+    # 2. Tokenize target query
+    query_str = f"{skill_gap_name} concepts tutorials practice"
+    query_tokens = tokenize(query_str)
 
-    # 3. Vectorize text using TF-IDF
-    vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf_matrix = vectorizer.fit_transform(corpus)
+    # 3. Fit TF-IDF on the entire corpus (catalog docs + query)
+    all_docs = documents + [query_tokens]
+    idf = compute_idf(all_docs)
 
-    # 4. Calculate Cosine Similarity between the query (last row) and all courses
-    query_vector = tfidf_matrix[-1]
-    course_vectors = tfidf_matrix[:-1]
-    similarity_scores = cosine_similarity(query_vector, course_vectors).flatten()
+    # 4. Vectorize query
+    query_tf = compute_tf(query_tokens)
+    query_vector = tfidf(query_tf, idf)
 
-    # 5. Extract top N matches
-    # Get indices of top N scores (args-sort returns ascending, so we reverse it)
-    top_indices = similarity_scores.argsort()[::-1][:top_n]
-
+    # 5. Vectorize and calculate similarity for each course
     recommendations = []
-    for idx in top_indices:
-        if similarity_scores[idx] > 0.05:  # Only recommend if there is some relevance
-            course = df.iloc[idx].to_dict()
-            course["match_score"] = float(similarity_scores[idx])
-            recommendations.append(course)
+    for idx, course in enumerate(catalog):
+        doc_tf = compute_tf(documents[idx])
+        doc_vector = tfidf(doc_tf, idf)
 
-    return recommendations
+        sim = cosine_similarity(query_vector, doc_vector)
+        if sim > 0.05:  # Only recommend if there is some relevance
+            course_copy = dict(course)
+            course_copy["match_score"] = float(sim)
+            recommendations.append(course_copy)
 
-# Example usage (for local testing):
+    # 6. Sort by similarity score descending
+    recommendations.sort(key=lambda x: x["match_score"], reverse=True)
+    return recommendations[:top_n]
+
+
 if __name__ == "__main__":
     print("Testing ML Recommendation Engine...")
     recs = recommend_resources("Model Evaluation & Tuning", top_n=2)

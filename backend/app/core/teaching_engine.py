@@ -97,17 +97,19 @@ def evaluate_answer(
     question = topic.get("question", {})
     correct_explanation = question.get("correctExplanation", "")
 
+    skill_name = skill_id.replace("_", " ").title()
     if is_correct:
-        from app.core.llm import get_llm_provider
-        feedback_prompt = (
-            f"The learner correctly answered a question about {skill_id.replace('_', ' ')}. "
-            f"Give 2-sentence positive reinforcement and mention they're ready for the next concept."
+        feedback_body = (
+            f"Excellent work! You correctly answered the question about {skill_name}.\n\n"
+            f"Your understanding of '{question.get('conceptTag', skill_name)}' is solid. You're ready to proceed to the next concept!"
         )
-        feedback_body = get_llm_provider().generate(f"correct feedback for {skill_id}")
         recommended_action = "continue"
     else:
-        from app.core.llm import get_llm_provider
-        feedback_body = get_llm_provider().generate(f"incorrect feedback explain {skill_id} simply")
+        feedback_body = (
+            f"Not quite right. Let's review the concept of {skill_name}.\n\n"
+            f"Hint: {correct_explanation or 'Review the explanation and example code above before trying again.'}\n\n"
+            f"Keep practicing! Repetition and working through mistakes is how learning happens."
+        )
         recommended_action = "practice_more"
 
     return {

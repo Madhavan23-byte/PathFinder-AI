@@ -60,6 +60,15 @@ def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
             detail="Missing authorization header."
         )
     token = authorization.split(" ")[1]
+    
+    from app.database import db
+    token_blocklist_collection = db["token_blocklist"]
+    if token_blocklist_collection.find_one({"token": token}):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session has been logged out. Please log in again."
+        )
+
     payload = decode_jwt_token(token)
     return payload["sub"]
 

@@ -63,22 +63,31 @@ def get_careers():
 
 @router.get("/partners")
 def get_partners():
-    return [
-        {
-            "id": "prt_01", "name": "Aravind Swamy", "role": "Aspiring AI Researcher",
-            "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-            "matchPercentage": 94, "targetCareer": "Machine Learning Engineer",
-            "currentFocus": "Deep Learning & Neural Networks",
-            "complementarySkills": ["Deep Learning", "PyTorch", "Mathematics"],
-        },
-        {
-            "id": "prt_02", "name": "Sophia Chen", "role": "Data Science Graduate",
-            "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
-            "matchPercentage": 89, "targetCareer": "Data Scientist",
-            "currentFocus": "Model Evaluation & Statistics",
-            "complementarySkills": ["Statistics & P-Values", "Data Storytelling", "Python"],
-        },
-    ]
+    from app.database import db
+    from app.core.security import sanitize_doc
+    study_partners_collection = db["study_partners"]
+
+    if study_partners_collection.count_documents({}) == 0:
+        default_partners = [
+            {
+                "id": "prt_01", "name": "Aravind Swamy", "role": "Aspiring AI Researcher",
+                "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+                "matchPercentage": 94, "targetCareer": "Machine Learning Engineer",
+                "currentFocus": "Deep Learning & Neural Networks",
+                "complementarySkills": ["Deep Learning", "PyTorch", "Mathematics"],
+            },
+            {
+                "id": "prt_02", "name": "Sophia Chen", "role": "Data Science Graduate",
+                "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+                "matchPercentage": 89, "targetCareer": "Data Scientist",
+                "currentFocus": "Model Evaluation & Statistics",
+                "complementarySkills": ["Statistics & P-Values", "Data Storytelling", "Python"],
+            }
+        ]
+        study_partners_collection.insert_many(default_partners)
+
+    items = list(study_partners_collection.find({}))
+    return [sanitize_doc(item) for item in items]
 
 
 @router.get("/learning-sessions")

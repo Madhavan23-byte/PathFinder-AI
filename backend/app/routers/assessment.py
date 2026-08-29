@@ -63,8 +63,9 @@ def start_assessment(user_id: str = Depends(get_current_user_id)):
 
 @router.post("/submit")
 def submit_assessment(data: AssessmentSubmitSchema, user_id: str = Depends(get_current_user_id)):
-    """Score submitted answers, update learner model, skill gaps, recommendations, roadmap, and badges."""
+    """Score submitted answers, update learner model, skill gaps, recommendations, roadmap, and badges dynamically."""
     questions = _load_questions()
+    questions_map = {q["id"]: q for q in questions}
     correct_mapping = {q["id"]: q["correctIndex"] for q in questions}
     total_q = len(correct_mapping)
     num_correct = sum(
@@ -80,15 +81,67 @@ def submit_assessment(data: AssessmentSubmitSchema, user_id: str = Depends(get_c
         "answers": data.answers, "timestamp": now_str,
     })
 
-    # 2. Update learner model
+    # 2. Evaluate answers dynamically by skill ID
+    skill_correct_counts = {}
+    skill_total_counts = {}
+    
+    for qid, ans_idx in data.answers.items():
+        if qid in questions_map:
+            q = questions_map[qid]
+            sid = q["skillId"]
+            is_correct = (q["correctIndex"] == ans_idx)
+            
+            skill_total_counts[sid] = skill_total_counts.get(sid, 0) + 1
+            if is_correct:
+                skill_correct_counts[sid] = skill_correct_counts.get(sid, 0) + 1
+
+    all_skills = [
+        "python_foundations", "statistics_probability", "machine_learning",
+        "model_evaluation", "sql_databases", "deep_learning",
+        "linear_algebra", "data_structures"
+    ]
+    
+    skill_scores = {}
+    for sid in all_skills:
+        if sid in skill_total_counts:
+            correct = skill_correct_counts.get(sid, 0)
+            total = skill_total_counts[sid]
+            skill_scores[sid] = int((correct / total) * 100)
+        else:
+            # Default for unassessed skills
+            skill_scores[sid] = 30
+
+    # Classify strengths and weaknesses
+    skill_names = {
+        "python_foundations": "Python Foundations",
+        "statistics_probability": "Statistics & Probability",
+        "machine_learning": "Machine Learning Fundamentals",
+        "model_evaluation": "Model Evaluation & Tuning",
+        "sql_databases": "SQL & Databases",
+        "deep_learning": "Deep Learning",
+        "linear_algebra": "Linear Algebra",
+        "data_structures": "Data Structures & Algorithms"
+    }
+    
+    strong_skills = []
+    weak_skills = []
+    for sid, score_val in skill_scores.items():
+        name = skill_names.get(sid, sid.replace("_", " ").title())
+        if score_val >= 75:
+            strong_skills.append(name)
+        else:
+            weak_skills.append(name)
+
+    # 3. Update learner model with detailed skill scores
     learner_models_collection.update_one(
         {"user_id": user_id},
         {"$set": {
             "knowledge.overallMastery": score,
             "knowledge.conceptsMastered": num_correct,
             "knowledge.totalConcepts": total_q,
-            "knowledge.strongSkills": ["Python Foundations", "SQL Aggregations"] if score >= 50 else ["Python Basics"],
-            "knowledge.weakSkills": ["Model Evaluation Metrics", "Imbalanced Classification"] if score < 75 else ["Advanced MLOps"],
+            "knowledge.strongSkills": strong_skills,
+            "knowledge.weakSkills": weak_skills,
+            "knowledge.skill_scores": skill_scores,
             "ability.assessmentAccuracy": score,
             "ability.totalAttempts": 1,
             "ability.masteryProgression": score,
@@ -97,92 +150,108 @@ def submit_assessment(data: AssessmentSubmitSchema, user_id: str = Depends(get_c
         upsert=True,
     )
 
-    # 3. Populate skill gaps
+    # 4. Populate skill gaps dynamically based on target career
+    from app.database import profiles_collection
+    from app.core.career_engine import get_career_skill_requirements
+    
+    profile = profiles_collection.find_one({"user_id": user_id}) or {}
+    target_career = profile.get("targetCareer", "Machine Learning Engineer")
+    
+    career_skills = get_career_skill_requirements(target_career)
+    
     skill_gaps_collection.delete_many({"user_id": user_id})
-    skill_gaps_collection.insert_many([
-        {
-            "user_id": user_id, "skillId": "skl_eval",
-            "skillName": "Model Evaluation & Tuning",
-            "currentLevel": max(30, score - 20), "requiredLevel": 80,
-            "gapPriority": "Critical" if score < 70 else "Medium",
-            "estimatedHours": 12,
-            "prerequisites": ["Machine Learning Fundamentals"],
-            "careerRelevance": "Essential for ML Engineers to assess overfitting, ROC-AUC, Precision/Recall trade-offs.",
-        },
-        {
-            "user_id": user_id, "skillId": "skl_math",
-            "skillName": "Statistics & Probability",
-            "currentLevel": max(40, score - 15), "requiredLevel": 80,
-            "gapPriority": "High", "estimatedHours": 10,
-            "prerequisites": ["Python Foundations"],
-            "careerRelevance": "Underpins hypothesis testing, Bayes theorem, and statistical inference in ML.",
-        },
-        {
-            "user_id": user_id, "skillId": "skl_ml",
-            "skillName": "Machine Learning Fundamentals",
-            "currentLevel": max(35, score - 10), "requiredLevel": 85,
-            "gapPriority": "High", "estimatedHours": 20,
-            "prerequisites": ["Python Foundations", "Statistics & Probability"],
-            "careerRelevance": "Core competence required for supervised and unsupervised algorithmic modeling.",
-        },
-    ])
-    # 4. Populate recommendations dynamically
+    new_gaps = []
+    
+    for req in career_skills:
+        name = req.get("name", "")
+        sid = name.lower().replace(" ", "_").replace("&", "and").replace("/", "_")
+        
+        learner_level = skill_scores.get(sid, 30)
+        required_level = req.get("required", 80)
+        
+        if learner_level < required_level:
+            gap = required_level - learner_level
+            priority = "Critical" if gap > 40 else "High" if gap > 20 else "Medium"
+            estimated_hours = req.get("estimatedHours", 15)
+            
+            from app.core.skill_graph import get_skill_graph
+            graph = get_skill_graph()
+            graph_skill = graph.get_skill(sid)
+            
+            prereqs = graph_skill.get("prerequisites", []) if graph_skill else []
+            desc = graph_skill.get("description", "Essential for target career.") if graph_skill else ""
+            
+            prereq_names = [skill_names.get(p, p.replace("_", " ").title()) for p in prereqs]
+            
+            new_gaps.append({
+                "user_id": user_id,
+                "skillId": sid,
+                "skillName": name,
+                "currentLevel": int(learner_level),
+                "requiredLevel": int(required_level),
+                "gapPriority": priority,
+                "estimatedHours": estimated_hours,
+                "prerequisites": prereq_names,
+                "careerRelevance": desc,
+            })
+            
+    if new_gaps:
+        skill_gaps_collection.insert_many(new_gaps)
+
+    # 5. Populate recommendations dynamically using pure Python ML recommendation engine
     from app.core.recommendation import recommend_resources
-    from app.core.llm import generate_why_reason, generate_roadmap
+    from app.core.llm import generate_why_reason
     
     recommendations_collection.delete_many({"user_id": user_id})
-    target_gaps = ["Model Evaluation & Tuning", "Machine Learning Fundamentals"] if score < 75 else ["Advanced MLOps", "Deep Learning"]
-    
     new_recs = []
-    for idx, gap in enumerate(target_gaps):
-        matched_courses = recommend_resources(gap, top_n=1)
+    
+    for idx, gap in enumerate(new_gaps[:3]):
+        gap_name = gap["skillName"]
+        matched_courses = recommend_resources(gap_name, top_n=1)
         if matched_courses:
             course = matched_courses[0]
-            why_json = generate_why_reason(gap, "Machine Learning Engineer", {"Python": 90, "SQL": 85})
+            prior_knowledge = {skill_names.get(k, k): v for k, v in skill_scores.items()}
+            why_json = generate_why_reason(gap_name, target_career, prior_knowledge)
+            
+            prereq_list = [{"name": p, "status": "met" if skill_scores.get(p.lower().replace(" ", "_"), 0) >= 75 else "unmet"} 
+                           for p in gap["prerequisites"]]
+            
             new_recs.append({
-                "user_id": user_id, "id": f"rec_{idx+1:02d}",
-                "title": course.get("title", gap + " Course"),
+                "user_id": user_id,
+                "id": f"rec_{idx+1:02d}",
+                "title": course.get("title", gap_name + " Course"),
                 "type": course.get("type", "Course"),
-                "skillGapClosed": gap,
+                "skillGapClosed": gap_name,
                 "difficulty": course.get("difficulty", "Intermediate"),
                 "estimatedTime": course.get("estimatedTime", "5 hours"),
-                "prerequisites": [{"name": "Python Foundations", "status": "met"}],
+                "prerequisites": prereq_list,
                 "careerRelevance": "High",
                 "whyReason": why_json,
                 "provider": course.get("provider", "PathFinder Lab"),
                 "rating": course.get("rating", 4.8),
             })
+            
     if new_recs:
         recommendations_collection.insert_many(new_recs)
 
-    # 5. Populate roadmap dynamically
-    roadmaps_collection.delete_many({"user_id": user_id})
-    llm_roadmap = generate_roadmap("Machine Learning Engineer", target_gaps)
-    
-    if llm_roadmap and isinstance(llm_roadmap, list):
-        final_roadmap = []
-        for i, rm in enumerate(llm_roadmap):
-            rm["user_id"] = user_id
-            rm["id"] = f"rd_{i+1:02d}"
-            rm["order"] = i + 1
-            rm["status"] = "completed" if i == 0 else "current" if i == 1 else "locked"
-            final_roadmap.append(rm)
-        roadmaps_collection.insert_many(final_roadmap)
-    else:
-        # Fallback if LLM fails (API key missing or bad JSON)
-        roadmaps_collection.insert_many([
-            {"user_id": user_id, "id": "rd_01", "title": "Python Core", "skillName": "Python Foundations", "phase": 1, "phaseTitle": "Foundations", "order": 1, "status": "completed", "estimatedHours": 10, "difficulty": "Beginner", "resourcesCount": 3, "whyPositioned": "Verified initial proficiency in diagnostic assessment."},
-            {"user_id": user_id, "id": "rd_02", "title": target_gaps[0], "skillName": target_gaps[0], "phase": 2, "phaseTitle": "Core Skills", "order": 2, "status": "current", "estimatedHours": 15, "difficulty": "Intermediate", "resourcesCount": 5, "whyPositioned": "Primary skill gap detected."}
-        ])
+    # 6. Populate roadmap dynamically by calling skill graph engine
+    from app.routers.career import _regenerate_roadmap
+    _regenerate_roadmap(user_id, target_career)
 
-    # 6. Update progress
+    # 7. Update progress
     progress_collection.update_one(
         {"user_id": user_id},
-        {"$set": {"careerReadiness": max(50, score), "skillsMasteredCount": num_correct, "streakDays": 1, "learningHours": 1.5}},
+        {"$set": {
+            "careerReadiness": max(15, min(95, int(score * 0.7 + 10))),
+            "skillsMasteredCount": len(strong_skills),
+            "totalSkillsCount": len(career_skills) if career_skills else 6,
+            "streakDays": 1,
+            "learningHours": 1.5
+        }},
         upsert=True,
     )
 
-    # 7. Award badge if score >= 75
+    # 8. Award badge if score >= 75
     if score >= 75:
         badges_collection.update_one(
             {"user_id": user_id, "id": "bdg_diag"},
@@ -200,8 +269,8 @@ def submit_assessment(data: AssessmentSubmitSchema, user_id: str = Depends(get_c
     return {
         "attemptId": f"att_{int(time.time())}",
         "score": score,
-        "mastered": ["Data Structures", "SQL Aggregations"] if score >= 50 else ["Basic Python"],
-        "weaknesses": ["Evaluation Metrics Trade-offs"],
-        "difficultyReached": "Intermediate",
+        "mastered": strong_skills,
+        "weaknesses": weak_skills,
+        "difficultyReached": "Intermediate" if score >= 50 else "Beginner",
         "recommendedNextAction": "Complete target practice modules to level up skill gaps.",
     }

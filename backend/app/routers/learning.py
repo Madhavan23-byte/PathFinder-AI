@@ -61,6 +61,14 @@ def recalculate_roadmap(
     data: Optional[Dict[str, Any]] = None,
     user_id: str = Depends(get_current_user_id),
 ):
+    from app.database import profiles_collection
+    from app.routers.career import _regenerate_roadmap
+
+    profile = profiles_collection.find_one({"user_id": user_id}) or {}
+    target_career = profile.get("targetCareer", "Machine Learning Engineer")
+
+    _regenerate_roadmap(user_id, target_career)
+    
     items = get_roadmap(user_id)
     return {
         "success": True,
